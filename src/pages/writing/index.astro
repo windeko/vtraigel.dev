@@ -1,0 +1,42 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PlaqueCard from '../../components/PlaqueCard.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('posts', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime()
+);
+---
+<BaseLayout
+  title="Writing — Vladimir Traigel"
+  description="Notes on agentic dev workflows, MCP, LLM infrastructure, and shipping AI in production."
+>
+  <header class="whead">
+    <div class="wrap">
+      <span class="eyebrow">Writing</span>
+      <h1>Building in the open.</h1>
+      <p>Notes on agentic dev workflows, MCP, LLM infrastructure, and the messy realities of shipping AI in production.</p>
+    </div>
+  </header>
+  <main>
+    <div class="wrap">
+      {posts.length === 0 ? (
+        <p style="color:var(--muted);padding-bottom:80px">First posts coming soon.</p>
+      ) : (
+        <div class="pgrid" style="padding-bottom:80px">
+          {posts.map((p) => (
+            <PlaqueCard
+              href={`/writing/${p.id}`}
+              title={p.data.title}
+              tag={p.data.tag}
+              date={p.data.date}
+              readingTime={p.data.readingTime}
+              from={p.data.cover.from}
+              to={p.data.cover.to}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  </main>
+</BaseLayout>

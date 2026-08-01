@@ -1,0 +1,13 @@
+---
+import { NAV } from '../consts';
+import ThemeToggle from './ThemeToggle.astro';
+---
+<nav>
+  <div class="nav-in">
+    <a class="brand" href="/">vtraigel<b>.dev</b></a>
+    <div class="nav-links">
+      {NAV.map((item) => <a href={item.href}>{item.label}</a>)}
+      <ThemeToggle />
+    </div>
+  </div>
+</nav>

@@ -1,0 +1,37 @@
+---
+const caps = [
+  {
+    icon: '🤖',
+    title: 'Production AI systems',
+    body: 'Multi-agent & voice services on LangGraph and the Vercel AI SDK, wired across Anthropic, Bedrock, OpenAI and Gemini — with tracing you can actually debug.',
+  },
+  {
+    icon: '🧩',
+    title: 'Backend architecture',
+    body: 'Event-driven microservices over SNS/SQS, and infrastructure-as-code on AWS with Pulumi — from schema to CI/CD to production observability.',
+  },
+  {
+    icon: '✦',
+    title: 'Full-stack product',
+    body: 'Modern React / Next.js front-ends with streaming AI interfaces, built so the AI feels like a feature, not a demo.',
+  },
+];
+---
+<section id="work">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">What I do</span>
+      <h2>Applied AI, backed by real engineering.</h2>
+      <p>Ten years shipping production systems — now focused on making LLMs do useful, reliable work inside real products.</p>
+    </div>
+    <div class="caps">
+      {caps.map((c) => (
+        <div class="cap card">
+          <div class="ic">{c.icon}</div>
+          <h3>{c.title}</h3>
+          <p>{c.body}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

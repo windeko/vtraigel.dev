@@ -1,0 +1,114 @@
+---
+import { TESTIMONIALS } from '../data/testimonials';
+---
+<section id="quotes-sec">
+  <div class="wrap qhead">
+    <div>
+      <span class="eyebrow">Kind words</span>
+      <h2>People I've built with.</h2>
+    </div>
+    <div class="cbtns">
+      <button class="cbtn" id="cprev" aria-label="Previous" disabled>←</button>
+      <button class="cbtn" id="cnext" aria-label="Next">→</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="carousel" id="carousel">
+      {TESTIMONIALS.map((t) => (
+        <article class="quote card">
+          <blockquote class="qt">{t.quote}</blockquote>
+          <button class="more" hidden>Read more →</button>
+          <div class="who">
+            <img src={t.avatar} alt={t.name} loading="lazy" />
+            <div>
+              <div class="n">{t.name}</div>
+              <div class="r">{t.role}</div>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<div class="modal" id="modal" hidden>
+  <div class="modal-back" data-close></div>
+  <div class="modal-card card">
+    <button class="modal-x" data-close aria-label="Close">×</button>
+    <header class="modal-head">
+      <img class="modal-img" alt="" />
+      <div>
+        <div class="n modal-n"></div>
+        <div class="r modal-r"></div>
+      </div>
+    </header>
+    <blockquote class="modal-qt"></blockquote>
+  </div>
+</div>
+
+<script>
+  const car = document.getElementById('carousel');
+  const cprev = document.getElementById('cprev') as HTMLButtonElement | null;
+  const cnext = document.getElementById('cnext') as HTMLButtonElement | null;
+
+  if (car && cprev && cnext) {
+    const step = () => {
+      const q = car.querySelector<HTMLElement>('.quote');
+      return q ? q.offsetWidth + 22 : 320;
+    };
+    cprev.addEventListener('click', () => car.scrollBy({ left: -step(), behavior: 'smooth' }));
+    cnext.addEventListener('click', () => car.scrollBy({ left: step(), behavior: 'smooth' }));
+
+    const updateArrows = () => {
+      cprev.disabled = car.scrollLeft <= 4;
+      cnext.disabled = car.scrollLeft >= car.scrollWidth - car.clientWidth - 4;
+    };
+    car.addEventListener('scroll', () => requestAnimationFrame(updateArrows), { passive: true });
+    window.addEventListener('resize', updateArrows);
+    car.scrollLeft = 0;
+    updateArrows();
+  }
+
+  // modal
+  const modal = document.getElementById('modal');
+  if (modal) {
+    const mqt = modal.querySelector('.modal-qt') as HTMLElement;
+    const mimg = modal.querySelector('.modal-img') as HTMLImageElement;
+    const mn = modal.querySelector('.modal-n') as HTMLElement;
+    const mr = modal.querySelector('.modal-r') as HTMLElement;
+
+    const open = (card: Element) => {
+      mqt.textContent = card.querySelector('.qt')!.textContent;
+      const who = card.querySelector('.who')!;
+      mimg.src = who.querySelector('img')!.src;
+      mn.textContent = who.querySelector('.n')!.textContent;
+      mr.textContent = who.querySelector('.r')!.textContent;
+      modal.hidden = false;
+      document.body.style.overflow = 'hidden';
+    };
+    const close = () => {
+      modal.hidden = true;
+      document.body.style.overflow = '';
+    };
+    modal.querySelectorAll('[data-close]').forEach((el) => el.addEventListener('click', close));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !modal.hidden) close();
+    });
+
+    document.querySelectorAll('.quote').forEach((card) => {
+      card.querySelector('.more')?.addEventListener('click', () => open(card));
+    });
+
+    const evalClamp = () => {
+      document.querySelectorAll('.quote').forEach((card) => {
+        const qt = card.querySelector('.qt') as HTMLElement;
+        const more = card.querySelector('.more') as HTMLElement;
+        more.hidden = !(qt.scrollHeight - qt.clientHeight > 4);
+      });
+    };
+    evalClamp();
+    window.addEventListener('load', evalClamp);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(evalClamp);
+  }
+</script>

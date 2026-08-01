@@ -1,0 +1,24 @@
+---
+title: "Splitting a monolith with Pulumi, without downtime"
+description: "Notes from carving an event-driven microservice out of a live monolith using infrastructure-as-code."
+date: 2026-06-24
+tag: "infra"
+readingTime: "11 min read"
+cover: { from: "#B5623C", to: "#5E2A16" }
+---
+
+Splitting a monolith is less about the code and more about the seams — data ownership, events, and the order you cut things in. Pulumi made the infrastructure side reproducible enough that I could move carefully.
+
+> This is a starter draft — replace it with the real write-up before launch.
+
+## Move the boundary, not the code
+
+The first extraction wasn't code — it was defining which service owns which data. Everything else followed from that line.
+
+## Events over calls
+
+Synchronous calls between the old monolith and the new service just move the coupling around. Domain events over SNS/SQS let each side evolve on its own clock.
+
+## Infrastructure you can re-run
+
+Describing the whole stack in Pulumi meant I could stand up a staging copy identically, rehearse the cutover, and roll back with confidence.

@@ -1,0 +1,31 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  post: CollectionEntry<'posts'>;
+}
+const { post } = Astro.props;
+const { title, description, date, tag, readingTime } = post.data;
+
+const meta =
+  date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
+  ` · ${tag}` +
+  (readingTime ? ` · ${readingTime}` : '');
+---
+<BaseLayout title={`${title} — Vladimir Traigel`} description={description} article={true}>
+  <main class="article">
+    <div class="wrap">
+      <div class="article-head">
+        <div class="meta">{meta}</div>
+        <h1>{title}</h1>
+      </div>
+      <div class="prose">
+        <slot />
+      </div>
+      <div style="max-width:720px;margin:0 auto">
+        <a class="back" href="/writing">← All writing</a>
+      </div>
+    </div>
+  </main>
+</BaseLayout>

@@ -1,0 +1,31 @@
+---
+import { Image } from 'astro:assets';
+import profile from '../assets/profile.jpg';
+---
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div class="reveal">
+      <span class="eyebrow">AI/LLM · Full-Stack Engineer</span>
+      <h1>Hi, I'm Vladimir.<br />I build <span class="accent">AI systems</span> that ship.</h1>
+      <p class="lead">
+        Senior full-stack engineer working at the intersection of applied AI and production
+        backends — currently building multi-agent systems for hospitality at Arbio.
+      </p>
+      <div class="cta-row">
+        <a href="/writing" class="btn btn-primary">Read what I'm building →</a>
+        <a href="#contact" class="btn btn-ghost">Get in touch</a>
+      </div>
+    </div>
+
+    <div class="card whoami reveal" style="animation-delay:.12s">
+      <Image class="avatar" src={profile} alt="Vladimir Traigel" width={92} height={92} />
+      <div class="prompt">whoami</div>
+      <div class="wrow"><span class="k">role</span><span class="v">Senior Full-Stack Engineer</span></div>
+      <div class="wrow"><span class="k">focus</span><span class="v">AI / LLM · multi-agent</span></div>
+      <div class="wrow"><span class="k">stack</span><span class="v">TypeScript · Node · React</span></div>
+      <div class="wrow"><span class="k">infra</span><span class="v">AWS · Pulumi · Docker</span></div>
+      <div class="wrow"><span class="k">based</span><span class="v">Belgrade, Serbia</span></div>
+      <div class="wrow"><span class="k">status</span><span class="v on">open to interesting problems</span></div>
+    </div>
+  </div>
+</header>

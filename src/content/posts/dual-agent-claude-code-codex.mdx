@@ -1,0 +1,28 @@
+---
+title: "Running Claude Code + Codex as a dual-agent setup"
+description: "How I pair Claude Code for planning and execution with Codex CLI for cross-model review — and why two models beat one."
+date: 2026-07-20
+tag: "ai-workflow"
+readingTime: "7 min read"
+cover: { from: "#C88A2C", to: "#6E4610" }
+---
+
+I spend most of my day pairing with agents rather than typing code line by line. The setup that stuck: **Claude Code** drives planning and execution, and **Codex CLI** acts as an independent reviewer. Two models, different training, catching each other's blind spots.
+
+> This is a starter draft — replace it with the real write-up before launch.
+
+## Why two models
+
+A single model reviewing its own output is a weak check — it tends to agree with itself. Bringing in a second model from a different family turns review into a genuine second opinion. The disagreements are where the value is.
+
+## The loop
+
+The workflow is simple:
+
+1. Claude plans the change and writes the diff.
+2. Codex reviews the diff cold, with no memory of how it was produced.
+3. I arbitrate the disagreements — which is where I actually learn something.
+
+## What I'd tell my past self
+
+Keep the reviewer ignorant of the author's reasoning. The moment the reviewer sees the justification, it starts rationalising instead of scrutinising.

@@ -1,0 +1,22 @@
+---
+interface Props {
+  href: string;
+  title: string;
+  tag: string;
+  date: Date;
+  readingTime?: string;
+  from: string;
+  to: string;
+}
+const { href, title, tag, date, readingTime, from, to } = Astro.props;
+const meta =
+  date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) +
+  (readingTime ? ` · ${readingTime}` : '');
+---
+<a class="plaque" href={href} style={`--g1:${from};--g2:${to}`}>
+  <span class="ptag">{tag}</span>
+  <div class="pcap">
+    <h3>{title}</h3>
+    <div class="pmeta">{meta}</div>
+  </div>
+</a>

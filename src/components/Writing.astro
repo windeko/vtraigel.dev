@@ -1,0 +1,37 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  posts: CollectionEntry<'posts'>[];
+}
+const { posts } = Astro.props;
+
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+---
+<section id="writing">
+  <div class="wrap">
+    <div class="wr-head">
+      <div class="wr-head-l">
+        <span class="eyebrow">Writing</span>
+        <h2>Notes from building in the open.</h2>
+        <p>Working through agentic dev workflows, MCP, and LLM infrastructure — the things I wish someone had written down first.</p>
+      </div>
+      <a class="viewall" href="/writing">View all →</a>
+    </div>
+
+    {posts.length === 0 ? (
+      <p style="color:var(--muted)">First posts coming soon.</p>
+    ) : (
+      <div class="posts">
+        {posts.map((p) => (
+          <a class="post" href={`/writing/${p.id}`}>
+            <span class="date">{fmt(p.data.date)}</span>
+            <span class="t">{p.data.title}</span>
+            <span class="tag">{p.data.tag}</span>
+          </a>
+        ))}
+      </div>
+    )}
+  </div>
+</section>

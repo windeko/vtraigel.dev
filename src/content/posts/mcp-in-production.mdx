@@ -1,0 +1,24 @@
+---
+title: "Wiring MCP into a production agent, the parts that bite"
+description: "Model Context Protocol is elegant on paper. Here are the sharp edges you only find once real traffic hits it."
+date: 2026-07-08
+tag: "mcp"
+readingTime: "9 min read"
+cover: { from: "#3A4A55", to: "#141A20" }
+---
+
+The Model Context Protocol makes it deceptively easy to give an agent tools. The demo works in five minutes. Production is a different story.
+
+> This is a starter draft — replace it with the real write-up before launch.
+
+## Timeouts are your real API
+
+Every tool call is a network call, and network calls fail. The agent needs a story for slow tools, dead tools, and tools that lie about being done.
+
+## Scope the surface area
+
+Exposing every tool to every agent is how you get an agent that confidently does the wrong thing. Scope tools to the task, not the platform.
+
+## Observability first
+
+If you can't trace which tool the model called, with which arguments, and what came back, you're debugging blind. Wire tracing before you wire the second tool.

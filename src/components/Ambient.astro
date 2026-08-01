@@ -1,0 +1,33 @@
+---
+---
+<div class="ambient" aria-hidden="true">
+  <span class="b1"></span>
+  <span class="b2"></span>
+  <span class="b3"></span>
+</div>
+
+<script>
+  const blobs = [...document.querySelectorAll<HTMLElement>('.ambient span')];
+  const factors = [0.2, -0.14, 0.3];
+  let ticking = false;
+  function parallax() {
+    const y = window.scrollY || 0;
+    blobs.forEach((b, i) => {
+      b.style.transform = `translate3d(0, ${(y * factors[i]).toFixed(1)}px, 0)`;
+    });
+    ticking = false;
+  }
+  if (blobs.length && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (!ticking) {
+          requestAnimationFrame(parallax);
+          ticking = true;
+        }
+      },
+      { passive: true }
+    );
+    parallax();
+  }
+</script>
