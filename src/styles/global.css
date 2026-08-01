@@ -7,6 +7,14 @@
   --glass-bg:rgba(251,248,242,.72); --glass-brd:rgba(35,32,27,.10); --glass-hi:rgba(255,255,255,.6);
   --chip-bg:#EAE1D0; --chip-ink:#6E5B37;
   --blob1:rgba(192,128,28,.26); --blob2:rgba(205,116,74,.19); --blob3:rgba(224,178,90,.18);
+  /* Syntax highlighting — shiki is set to theme:'css-variables', so these ARE the theme.
+     Leave them undefined and code blocks render as flat unstyled text. */
+  --astro-code-background:var(--surface); --astro-code-foreground:var(--ink);
+  --astro-code-token-comment:#8C8375; --astro-code-token-keyword:#A14A28;
+  --astro-code-token-string:#5C6B33; --astro-code-token-string-expression:#5C6B33;
+  --astro-code-token-function:#8A5A12; --astro-code-token-constant:#A6741C;
+  --astro-code-token-parameter:#6E655A; --astro-code-token-punctuation:#6E655A;
+  --astro-code-token-link:#976210;
 }
 [data-theme="dark"]{
   --paper:#16120D; --surface:#1E1912; --ink:#EFE8DB; --muted:#A99E8C;
@@ -16,6 +24,12 @@
   --glass-bg:rgba(30,25,18,.60); --glass-brd:rgba(239,232,219,.12); --glass-hi:rgba(255,255,255,.05);
   --chip-bg:#2A2317; --chip-ink:#D8C8A2;
   --blob1:rgba(219,162,63,.16); --blob2:rgba(201,120,80,.13); --blob3:rgba(150,118,58,.15);
+  --astro-code-background:var(--surface); --astro-code-foreground:var(--ink);
+  --astro-code-token-comment:#8A8073; --astro-code-token-keyword:#E08A5E;
+  --astro-code-token-string:#A8B978; --astro-code-token-string-expression:#A8B978;
+  --astro-code-token-function:#DBA23F; --astro-code-token-constant:#E7C06C;
+  --astro-code-token-parameter:#A99E8C; --astro-code-token-punctuation:#A99E8C;
+  --astro-code-token-link:#E7B85C;
 }
 
 /* ============ Base ============ */
