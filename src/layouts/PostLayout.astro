@@ -13,7 +13,12 @@ const meta =
   ` · ${tag}` +
   (readingTime ? ` · ${readingTime}` : '');
 ---
-<BaseLayout title={`${title} — Vladimir Traigel`} description={description} article={true}>
+<BaseLayout
+  title={`${title} — Vladimir Traigel`}
+  description={description}
+  ogImage={`/og/${post.id}.png`}
+  article={true}
+>
   <main class="article">
     <div class="wrap">
       <div class="article-head">

@@ -74,7 +74,9 @@ If a design change is requested, prefer adjusting the CSS custom properties in
   rather than raw `<img>` in `public/` unless the file is already small.
 - `public/cv/Vladimir-Traigel-CV.pdf` is a generated placeholder, not the real CV.
 - `public/og-default.png` is a generated placeholder OG image in the right palette/fonts —
-  fine as a stopgap, but per-post OG image generation would be a nice upgrade.
+  used for all non-post pages. Posts get a real per-post OG image built at build time by
+  `src/pages/og/[...slug].png.ts` (satori → SVG → sharp → PNG, fonts vendored in
+  `src/assets/fonts/`, accent strip uses the post's own `cover` gradient).
 
 ## Launch plan (agreed, don't relitigate without reason)
 
