@@ -58,21 +58,23 @@ If a design change is requested, prefer adjusting the CSS custom properties in
 
 - Blog posts: `src/content/posts/*.mdx`, schema in `src/content.config.ts`.
   Frontmatter: `title, description, date, tag, readingTime?, cover: {from,to}, draft`.
-- Homepage shows the 5 most recent non-draft posts (`Writing.astro`); `/writing` shows all
-  as a plaque grid (`PlaqueCard.astro`) with a frosted-glass caption panel over a gradient
-  cover (until real cover images exist).
+- Homepage shows the 5 most recent non-draft posts (`Writing.astro`). With no published
+  posts the whole section is omitted rather than showing an empty state — it comes back on
+  its own once a real post ships. `/writing` shows all as a plaque grid (`PlaqueCard.astro`)
+  with a frosted-glass caption panel over a gradient cover (until real cover images exist).
 - Testimonials and projects are data-driven (`src/data/testimonials.ts`, `projects.ts`) —
   edit data, not markup.
 
 ## Known TODOs / not-yet-real content
 
 - The 3 starter posts are **placeholders** written to prove the content pipeline — they say
-  so in-body ("This is a starter draft"). Replace with real posts or set `draft: true`.
+  so in-body ("This is a starter draft"). All three are `draft: true`, so nothing publishes
+  them; replace them with real posts rather than flipping the flag back.
 - Images are self-hosted (done): testimonial avatars live in `public/testimonials/`, the hero
   photo in `src/assets/profile.jpg` rendered through `astro:assets` (`<Image>`), which emits a
   ~2 kB webp instead of the original 218 kB jpeg. Keep new photos in `src/assets/` + `<Image>`
   rather than raw `<img>` in `public/` unless the file is already small.
-- `public/cv/Vladimir-Traigel-CV.pdf` is a generated placeholder, not the real CV.
+- `public/cv/Vladimir-Traigel-CV.pdf` is the real CV (replaced in `a72d737`), not a placeholder.
 - `public/og-default.png` is a generated placeholder OG image in the right palette/fonts —
   used for all non-post pages. Posts get a real per-post OG image built at build time by
   `src/pages/og/[...slug].png.ts` (satori → SVG → sharp → PNG, fonts vendored in
