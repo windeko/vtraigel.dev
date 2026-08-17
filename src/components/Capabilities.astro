@@ -1,33 +1,28 @@
 ---
 const caps = [
   {
-    icon: '🤖',
-    title: 'Production AI systems',
-    body: 'Multi-agent & voice services on LangGraph and the Vercel AI SDK, wired across Anthropic, Bedrock, OpenAI and Gemini — with tracing you can actually debug.',
+    title: 'AI & LLM systems',
+    body: 'Production multi-agent systems with LangGraph and the Vercel AI SDK, wired across Anthropic, Bedrock, Groq, OpenAI and Gemini.',
   },
   {
-    icon: '🧩',
-    title: 'Backend architecture',
-    body: 'Event-driven microservices over SNS/SQS, and infrastructure-as-code on AWS with Pulumi — from schema to CI/CD to production observability.',
+    title: 'Full-stack engineering',
+    body: 'End-to-end TypeScript — Node.js services and React front ends, built to be owned by one engineer from API to UI.',
   },
   {
-    icon: '✦',
-    title: 'Full-stack product',
-    body: 'Modern React / Next.js front-ends with streaming AI interfaces, built so the AI feels like a feature, not a demo.',
+    title: 'Cloud infrastructure',
+    body: 'Pulumi and AWS, splitting monoliths into event-driven microservices without stopping feature work.',
   },
 ];
 ---
 <section id="work">
   <div class="wrap">
-    <div class="sec-head">
+    <div class="sec-head reveal">
       <span class="eyebrow">What I do</span>
-      <h2>Applied AI, backed by real engineering.</h2>
-      <p>Ten years shipping production systems — now focused on making LLMs do useful, reliable work inside real products.</p>
+      <h2>Where I spend my engineering time</h2>
     </div>
-    <div class="caps">
+    <div class="caps reveal">
       {caps.map((c) => (
         <div class="cap card">
-          <div class="ic">{c.icon}</div>
           <h3>{c.title}</h3>
           <p>{c.body}</p>
         </div>

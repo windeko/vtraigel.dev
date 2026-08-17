@@ -1,0 +1,66 @@
+---
+import { Image } from 'astro:assets';
+import profile from '../assets/profile.jpg';
+
+const stats = [
+  {
+    label: 'happy clients, incl. freelance',
+    value: '10+',
+    // people
+    path: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  },
+  {
+    label: 'projects, startups to big tech',
+    value: '15+',
+    // bars
+    path: '<rect x="3" y="11" width="7" height="10" rx="1"/><rect x="14" y="6" width="7" height="15" rx="1"/><path d="M3 7l3.5-4L10 7"/>',
+  },
+  {
+    label: 'projects on cloud infrastructure',
+    value: '8+',
+    // cloud
+    path: '<path d="M7 18a4.5 4.5 0 0 1-1-8.9A5.5 5.5 0 0 1 16.5 9c.2 0 .4 0 .6.03A4 4 0 0 1 17 18H7z"/>',
+  },
+  {
+    label: 'engineers led at peak',
+    value: '4',
+    // star
+    path: '<path d="M12 2l2.4 5.3 5.8.6-4.4 3.9 1.3 5.7L12 14.8 6.9 17.5l1.3-5.7-4.4-3.9 5.8-.6z"/>',
+  },
+];
+---
+<section id="about">
+  <div class="wrap">
+    <div class="about-grid reveal">
+      <div class="card about-photo">
+        <Image src={profile} alt="Vladimir Traigel" width={680} widths={[340, 680]} sizes="(max-width:600px) 90vw, 340px" />
+      </div>
+      <div class="about-copy">
+        <span class="eyebrow">About</span>
+        <h2>A bit about me</h2>
+        <p>
+          I'm Vlad — I build production systems where LLMs and multi-agent workflows meet real
+          infrastructure, currently at Arbio in Berlin. Most days I'm pairing with agents almost as
+          often as with people, which still feels a little strange and a little wonderful. Outside
+          of work I'm usually still at my desk with headphones on — I think better with music
+          running than in silence. I started this site to write down what I'm actually learning,
+          not what sounds good in a bio.
+        </p>
+      </div>
+    </div>
+
+    <div class="stats reveal">
+      {stats.map((s) => (
+        <div class="stat">
+          <div class="ic">
+            <svg viewBox="0 0 24 24" aria-hidden="true" set:html={s.path} />
+          </div>
+          <div>
+            <div class="num">{s.value}</div>
+            <div class="lbl">{s.label}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

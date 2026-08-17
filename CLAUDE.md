@@ -37,8 +37,11 @@ approved the final look. Treat these as fixed unless he asks to change them:
   "cream + serif + terracotta" AI-generated-site cliché.
 - **Type**: Bricolage Grotesque (display/headings), Inter (body), JetBrains Mono
   (labels, meta, the signature `whoami` card).
-- **Signature motif**: the `whoami` mono card in the hero — deliberately "engineer" but warm,
-  not a cold black terminal.
+- **Signature motif**: the `whoami` mono card — deliberately "engineer" but warm, not a cold
+  black terminal. Since the Aug 2026 redesign it sits as a glass overlay chip on the bottom of
+  the hero portrait, not as a standalone card beside the copy.
+- **Hero**: asymmetric — copy left (eyebrow, h1, lead, a mono typewriter line cycling three
+  phrases), large 3:4 editorial portrait right (`src/assets/mainphoto.jpg`).
 - **Liquid glass**: `.card` and related surfaces use `backdrop-filter: blur(...)` +
   translucent background + inset highlight. This only reads visually because of the
   **ambient parallax blobs** (`Ambient.astro`) behind the content — don't remove one without
@@ -47,8 +50,9 @@ approved the final look. Treat these as fixed unless he asks to change them:
   accent-colored border. No lift/translate, no cursor changes on disabled states, no black
   border on hover. Applies to `.btn-ghost`, `.toggle`, `.cbtn`, `.links a`.
 - **Shadows**: layered/soft (`--shadow` token, 3 layers), not a single hard drop shadow.
-- **Theme**: light by default, dark available via toggle, choice persisted in
-  `localStorage('theme')`, applied pre-paint (see `BaseHead.astro` inline script) to avoid
+- **Theme**: light by default — deliberately, and *not* following `prefers-color-scheme`; the
+  `theme-color` meta is pinned light to match. Dark is available via toggle, choice persisted
+  in `localStorage('theme')`, applied pre-paint (see `BaseHead.astro` inline script) to avoid
   flash-of-wrong-theme.
 
 If a design change is requested, prefer adjusting the CSS custom properties in
@@ -62,8 +66,11 @@ If a design change is requested, prefer adjusting the CSS custom properties in
   posts the whole section is omitted rather than showing an empty state — it comes back on
   its own once a real post ships. `/writing` shows all as a plaque grid (`PlaqueCard.astro`)
   with a frosted-glass caption panel over a gradient cover (until real cover images exist).
-- Testimonials and projects are data-driven (`src/data/testimonials.ts`, `projects.ts`) —
-  edit data, not markup.
+- Testimonials, projects and work history are data-driven (`src/data/testimonials.ts`,
+  `projects.ts`, `experience.ts`) — edit data, not markup.
+- Homepage order: Hero → About (photo + first-person copy + 4 stat tiles) → What I do →
+  Writing (hidden while all posts are drafts) → Projects + Experience timeline (two columns,
+  one section) → Testimonials → Contact.
 
 ## Known TODOs / not-yet-real content
 

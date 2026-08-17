@@ -12,7 +12,7 @@ export const PROJECTS: Project[] = [
     status: 'Live',
     live: true,
     description:
-      'Automated trading bot on the Binance API — configurable strategies, signal detection and risk management, trained on historical market data. Taught me a lot about financial data pipelines and the realities of algorithmic trading.',
+      'Automated trading bot on the Binance API — configurable strategies, signal detection and risk management, trained on historical market data.',
     stack: ['Node.js', 'TypeScript', 'Binance API', 'PostgreSQL', 'Docker'],
   },
   {

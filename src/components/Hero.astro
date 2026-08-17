@@ -1,31 +1,72 @@
 ---
 import { Image } from 'astro:assets';
-import profile from '../assets/profile.jpg';
+import mainphoto from '../assets/mainphoto.jpg';
 ---
 <header class="hero">
   <div class="wrap hero-grid">
-    <div class="reveal">
-      <span class="eyebrow">AI/LLM · Full-Stack Engineer</span>
-      <h1>Hi, I'm Vladimir.<br />I build <span class="accent">AI systems</span> that ship.</h1>
+    <div class="hero-copy reveal">
+      <span class="eyebrow">Senior full-stack engineer — AI &amp; LLM systems</span>
+      <h1>Building production software where <span class="accent">agents</span> do real work.</h1>
       <p class="lead">
-        Senior full-stack engineer working at the intersection of applied AI and production
-        backends — currently building multi-agent systems for hospitality at Arbio.
+        I'm Vlad, based in Belgrade — currently building multi-agent LLM systems at Arbio in
+        Berlin. This site is where I write about what actually works.
       </p>
+      <p class="typed" aria-hidden="true"><span id="typed"></span><span class="caret">|</span></p>
       <div class="cta-row">
-        <a href="/writing" class="btn btn-primary">Read what I'm building →</a>
-        <a href="#contact" class="btn btn-ghost">Get in touch</a>
+        <a href="#projects" class="btn btn-primary">See my work</a>
+        <a href="/writing" class="btn btn-ghost">Read the blog</a>
       </div>
     </div>
 
-    <div class="card whoami reveal" style="animation-delay:.12s">
-      <Image class="avatar" src={profile} alt="Vladimir Traigel" width={92} height={92} />
-      <div class="prompt">whoami</div>
-      <div class="wrow"><span class="k">role</span><span class="v">Senior Full-Stack Engineer</span></div>
-      <div class="wrow"><span class="k">focus</span><span class="v">AI / LLM · multi-agent</span></div>
-      <div class="wrow"><span class="k">stack</span><span class="v">TypeScript · Node · React</span></div>
-      <div class="wrow"><span class="k">infra</span><span class="v">AWS · Pulumi · Docker</span></div>
-      <div class="wrow"><span class="k">based</span><span class="v">Belgrade, Serbia</span></div>
-      <div class="wrow"><span class="k">status</span><span class="v on">open to interesting problems</span></div>
+    <div class="hero-photo reveal" style="animation-delay:.12s">
+      <Image
+        src={mainphoto}
+        alt="Vladimir Traigel"
+        width={920}
+        widths={[460, 920]}
+        sizes="(max-width:820px) 90vw, 460px"
+        loading="eager"
+        fetchpriority="high"
+      />
+      <div class="card whoami">
+        <div class="prompt">whoami</div>
+        <div class="wrow"><span class="k">role</span><span class="v">Senior full-stack engineer</span></div>
+        <div class="wrow"><span class="k">based</span><span class="v">Belgrade, Serbia</span></div>
+        <div class="wrow"><span class="k">focus</span><span class="v on">LLMs · multi-agent systems</span></div>
+        <div class="wrow"><span class="k">infra</span><span class="v">Pulumi · AWS</span></div>
+      </div>
     </div>
   </div>
 </header>
+
+<script>
+  const el = document.getElementById('typed');
+  const phrases = [
+    "Let's make your application faster.",
+    "Let's make your agents reliable.",
+    "Let's ship something real.",
+  ];
+  if (el && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    let phrase = 0;
+    let chars = 0;
+    let deleting = false;
+    const tick = () => {
+      const p = phrases[phrase];
+      let delay = deleting ? 35 : 55;
+      chars += deleting ? -1 : 1;
+      el.textContent = p.slice(0, chars);
+      if (!deleting && chars === p.length) {
+        deleting = true;
+        delay = 1800;
+      } else if (deleting && chars === 0) {
+        deleting = false;
+        phrase = (phrase + 1) % phrases.length;
+        delay = 300;
+      }
+      setTimeout(tick, delay);
+    };
+    tick();
+  } else if (el) {
+    el.textContent = phrases[0];
+  }
+</script>

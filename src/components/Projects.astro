@@ -1,26 +1,47 @@
 ---
 import { PROJECTS } from '../data/projects';
+import { EXPERIENCE } from '../data/experience';
 ---
 <section id="projects">
-  <div class="wrap">
-    <div class="sec-head">
-      <span class="eyebrow">Projects</span>
-      <h2>Things I build to learn.</h2>
-      <p>Side projects where I get to experiment end-to-end, from idea to production.</p>
+  <div class="wrap two-col reveal">
+    <div>
+      <div class="col-head">
+        <span class="eyebrow">Projects</span>
+        <h2>Things I've built on the side</h2>
+      </div>
+      <div class="projects">
+        {PROJECTS.map((p) => (
+          <div class="proj card">
+            <div class="proj-top">
+              <h3>{p.name}</h3>
+              <span class={`status${p.live ? ' live' : ''}`}>{p.status}</span>
+            </div>
+            <p>{p.description}</p>
+            <div class="stack">
+              {p.stack.map((s) => <span>{s}</span>)}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
-    <div class="projects">
-      {PROJECTS.map((p) => (
-        <div class="proj card">
-          <div class="proj-top">
-            <h3>{p.name}</h3>
-            <span class={`status${p.live ? ' live' : ''}`}>{p.status}</span>
+
+    <div>
+      <div class="col-head">
+        <span class="eyebrow">Experience</span>
+        <h2>Most significant experience</h2>
+      </div>
+      <div class="tl">
+        {EXPERIENCE.map((job) => (
+          <div class="tl-item">
+            <div class="co">{job.company}</div>
+            <div class="period">{job.period}</div>
+            <div class="loc">{job.location}</div>
+            <ul>
+              {job.points.map((point) => <li>{point}</li>)}
+            </ul>
           </div>
-          <p>{p.description}</p>
-          <div class="stack">
-            {p.stack.map((s) => <span>{s}</span>)}
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   </div>
 </section>

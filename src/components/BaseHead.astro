@@ -38,8 +38,8 @@ const personLd = {
 <title>{title}</title>
 <meta name="description" content={description} />
 <meta name="author" content={SITE.name} />
-<meta name="theme-color" content="#F3EFE6" media="(prefers-color-scheme: light)" />
-<meta name="theme-color" content="#16120D" media="(prefers-color-scheme: dark)" />
+<!-- Light is the default theme regardless of OS preference, so pin the browser chrome to it. -->
+<meta name="theme-color" content="#F3EFE6" />
 
 <!-- Favicon -->
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
