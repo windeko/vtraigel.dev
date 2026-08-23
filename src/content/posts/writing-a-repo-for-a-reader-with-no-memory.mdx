@@ -1,0 +1,114 @@
+---
+title: "Writing a repo for a reader with no memory"
+description: "83 design docs, a TODO file with a graveyard section, and four diagnostics that used to be questions. What changes when your main collaborator starts every session knowing nothing."
+date: 2026-08-24
+tag: "ai-workflow"
+readingTime: "9 min read"
+cover: { from: "#4E7A6B", to: "#1B2E28" }
+draft: false
+---
+
+My trading bot is a solo project. Nobody else has ever opened a pull request on it. By any normal reasoning, its documentation should be a `README` and a shrug.
+
+Instead it has 83 documents under `docs/plans/`, a `CLAUDE.md` that is longer and far more useful than the README, four custom skills, and a `TODO.md` with a section titled *"Closed (no work needed; do NOT redo without new evidence)"*.
+
+None of that is for a future teammate. It's for a collaborator who is genuinely excellent and starts every single session knowing nothing at all.
+
+## The one line that saves every session
+
+The very first thing `CLAUDE.md` says is that the README is a lie:
+
+> The default `README.md` is the upstream NestJS template and contains nothing project-specific — treat this file as the source of truth instead.
+
+That line exists because without it, every fresh session begins by confidently reading `README.md` — which is the unmodified Nest starter, complete with a "Description" section describing Nest — and forming an opinion about a project it has just misunderstood.
+
+That's the shape of the whole exercise. Not "document the code" — the code documents itself fine. Document the things a smart reader would reasonably conclude and be **wrong** about.
+
+The rest of that file is the same species of fact:
+
+- Market data always comes from Binance, no matter which exchange is configured for execution. *"Don't fix this without understanding why."*
+- `STOP_TRADING` is re-read from `process.env` on every tick, so setting the OS-level variable from outside the process does nothing — Node reads the environment once at startup.
+- Per-coin trade size lives in a TypeScript registry, not in `.env`, and there is deliberately no global override. Per-coin always wins.
+- The daily reset cron runs at 02:00 UTC, not midnight, so a deploy on a day boundary can't skip it.
+
+Every one of those was a surprise to somebody at some point. Usually me.
+
+## Design → plan → results
+
+The `docs/plans/` corpus is mostly triads: a design doc for what we're about to try and why, an implementation plan, and then a results doc for what actually happened.
+
+The results docs are the valuable ones, and they're valuable mostly when the answer was **no**.
+
+Trailing stops: five values, four coins, train and out-of-sample. No winners. Post-stop cooldown: five values. No winners — the existing entry gates already space trades further apart than any cooldown would. Multi-bar sell confirmation: seven coins, no winners, and one textbook overfit where a coin's training Sharpe went up 2.6× while its out-of-sample Sharpe collapsed from 1.15 to 0.17.
+
+Three good ideas, all dead, all documented with the numbers that killed them. Without that written down, "what if we tried a trailing stop?" is a question I get to have again every few months, at the cost of a day each time.
+
+So `TODO.md` has a graveyard, and each grave has a re-open trigger:
+
+> **Trailing stop — production wiring.** Closed. Backtest tested five trail values on four coins under train/OOS — no winners. Trailing stops give up the trending-tail upside our strategy depends on. **Re-open trigger:** a fundamentally different signal family that doesn't rely on trend tails.
+
+Re-opening requires new evidence — a new regime, a new strategy family, a new coin — not curiosity. It's the difference between institutional memory and an argument you keep losing to yourself.
+
+(And when the trigger fires, it fires. Six months later a fidelity fix to the stop-loss model changed the baseline enough that trailing stops earned a fresh sweep — which found that a *wide* 15% trail is nearly free insurance while a narrow one is a trap. The graveyard isn't a dogma. It's a bar to clear.)
+
+## Turning questions into tools
+
+Four questions came up often enough that they stopped being questions and became skills — small documented procedures the agent can run.
+
+`/check-droplet` is a health snapshot: systemd state, process resource usage, an in-process HTTP probe, egress IP (to catch reserved-IP drift), and recent warnings. One SSH round trip, read-only by construction.
+
+`/why-dont-buy` is the interesting one. When I see a price move and the bot didn't act, that question used to cost twenty minutes of log-reading. Now it replays the production buy gate — the cron-level checks against Mongo, then `canBuy()`, then the signal term by term — against the last 24 closed candles for every coin, and reports where each one stopped:
+
+```
+blocked at cron: hit daily stop-loss quota (stopLossToday=2; resets 02:00 UTC)
+blocked at canBuy: open position
+1 BUY would have fired @ 2026-08-19T14:00Z, but the volume filter blocked it
+```
+
+The last category is the good one: candles where the core signal *did* fire and a wrapper filter blocked it. That's not a bug report, it's a list of where the strategy's tuning actually binds.
+
+And the detail I'm most pleased with: the script's term-by-term replay is a *decomposition* of production logic, which means it can drift out of sync with the real thing. So it cross-checks itself. If its breakdown disagrees with production's canonical verdict on any candle, it prints:
+
+```
+decomposition drift detected on SOL @ 2026-08-19T14:00:00Z
+```
+
+A diagnostic that knows when it has gone stale is worth several that don't.
+
+## Half of every skill is a fence
+
+The section I write most carefully in each skill is **When NOT to use**.
+
+- `/why-dont-buy`: not for sell-side questions. Not for timeframes other than 1h over the last 24 hours — "the skill is deliberately fixed-shape; broader investigation belongs in an ad-hoc backtest."
+- `/check-droplet`: not for restarts or fixes. Read-only, full stop.
+- `/onboarding-new-coin`: not for a coin with under two years of hourly history, and not for "volatile garbage — the methodology does not save you from a bad coin choice; it only picks parameters for a coin you've already decided to trade. Filter at the *which coin* step, not the *which parameters* step."
+
+A capable agent with a plausible-looking tool will stretch that tool to cover the adjacent question. It's the same instinct a capable junior has, and it's usually right, and when it's wrong it's wrong quietly. Writing the boundary down converts "this doesn't quite fit" from an improvisation into a stop.
+
+The same instinct shows up in `onboarding-new-coin`'s core principle, which is a rule about not being clever:
+
+> The existing sweep script already encodes the methodology. This skill is about using it correctly and interpreting its output, not about reinventing the sweep.
+
+## Thirteen worktrees
+
+At the time of writing there are thirteen git worktrees in the repo: a strategy grid, a futures skeleton, a sweep-parallelism experiment, a coin onboarding batch, several bug fixes.
+
+Parameter sweeps take hours. Research forks constantly, and most forks die. Worktrees mean an experiment that turns out to be worthless costs a `git worktree remove` rather than a careful unwind of half-applied changes in the tree I actually work in. The graveyard in `TODO.md` is only cheap to fill because abandoning work is cheap.
+
+## What it costs, honestly
+
+This isn't free, and two things about it genuinely annoy me.
+
+**The corpus goes stale.** Eighty-three documents, and I cannot promise every one describes current reality. The mitigation is a split I try to hold: results docs are dated and effectively immutable — they record what happened on a day, and stay true — while `CLAUDE.md` is the only document that must always be current. When the two disagree, `CLAUDE.md` wins. When *it* is wrong, everything downstream is wrong, so it's the file I re-read after any behaviour change.
+
+**The design doc is the step you want to skip.** Writing down what you're about to try, and what result would make you abandon it, before running anything — that's where most of the value is, and it's precisely the part that feels like procrastination when you already "know" the answer. Every idea that later died in a results doc felt obviously correct at design time. That's the point: the doc is what makes the disagreement between your intuition and the data survive long enough to change your mind.
+
+**What I'd skip:** implementation plans for small changes. The design and the results earn their keep; a step-by-step plan for a two-file change is ceremony, and I've stopped writing those.
+
+## The actual payoff
+
+My previous post was an audit of the money-touching layer of this bot — nine confirmed defects, ranked, each with a `file:line` and a false-positive estimate.
+
+That audit was possible in an afternoon because the reasoning behind every design decision was already written down. When you find something that looks wrong, the expensive question isn't "is this wrong?" — it's "is this wrong, or did I have a reason?" A repo that answers the second question is a repo you can audit instead of merely re-read.
+
+The docs weren't overhead on the work. They were the thing that made the work checkable.
