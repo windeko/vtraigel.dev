@@ -1,14 +1,16 @@
 ---
 title: "I audited my own trading bot and found nine ways to lose money"
 description: "The order fills. The response never arrives. Now you own a position your database has never heard of — and it has no stop-loss. Notes from auditing, and then rebuilding, the money-touching layer of a bot I wrote."
-date: 2026-08-24
+date: 2026-08-23
 tag: "trading-bot"
 readingTime: "11 min read"
 cover: { from: "#8C6B3F", to: "#2E2318" }
 draft: false
 ---
 
-Last time I wrote about my spot trading bot, the problem was that the *backtest* was lying — it checked stop-loss once per candle while production checked every 30 seconds, and that gap was worth 28% of six years of simulated profit.
+*Building a trading bot in public, part 3 of 4. Previously: [my backtest was lying to me by 28%](/writing/backtest-lying-intrabar-stop-loss). Next: [writing a repo for a reader with no memory](/writing/writing-a-repo-for-a-reader-with-no-memory).*
+
+[Last time](/writing/backtest-lying-intrabar-stop-loss), the problem was that the *backtest* was lying — it checked stop-loss once per candle while production checked every 30 seconds, and that gap was worth 28% of six years of simulated profit.
 
 Fixing the simulator raised an uglier question. The backtest now models what production is *supposed* to do. Does production actually do it?
 
@@ -165,3 +167,5 @@ Seven of the twelve findings are closed. Four are open. One turned out not to be
 **Reconciliation is a loop, not an error handler.** You will never enumerate all the ways the two systems diverge. Write down the invariant instead, and run something that restores it on a schedule.
 
 **Prefer loud, symmetric failures.** The clock-drift bug wasn't dangerous because it broke things; it was dangerous because it broke *exactly half* of things, and the half that kept working was the half that opens positions.
+
+One question I've skipped over three posts now: how does a solo project keep enough of this straight to be auditable in the first place? [That's the last post in the series.](/writing/writing-a-repo-for-a-reader-with-no-memory)

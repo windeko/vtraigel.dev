@@ -1,18 +1,20 @@
 ---
 title: "My backtest was lying to me by 28%"
 description: "The simulator checked stop-loss once per candle. Production checked it every 30 seconds. Six years of results, one honest fix, and a portfolio I had to re-tune from scratch."
-date: 2026-08-24
+date: 2026-08-22
 tag: "trading-bot"
 readingTime: "9 min read"
 cover: { from: "#C4553C", to: "#5A2418" }
 draft: false
 ---
 
-I run a small spot trading bot. It polls Binance on a cron, runs an EMA/RSI signal per coin, and buys or sells with real money. Nothing exotic — the interesting part isn't the strategy, it's everything around it that decides whether the strategy's numbers mean anything.
+*Building a trading bot in public, part 2 of 4. Previously: [1,120 configs per coin](/writing/tuning-a-trading-bot-1120-configs). Next: [nine ways to lose money](/writing/auditing-my-own-trading-bot).*
 
-The bot ships with a backtester I'd been careful about. Deterministic given the same data file, strategy and params. Fees baked in at 0.1% per side, slippage at 0.05%. Train/out-of-sample split so I couldn't tune on the window I measured on. A six-criterion promotion gate that has rejected far more ideas than it approved — trailing stops, post-stop cooldowns, multi-bar sell confirmation all died there with zero winners across every coin.
+[Last time](/writing/tuning-a-trading-bot-1120-configs) I described the apparatus I use to pick this bot's parameters: 1,120 configs per coin, four data windows with four different jobs, pass criteria frozen in a design doc before any of it runs, and a relaxation ladder for when nothing passes. Trailing stops, post-stop cooldowns and multi-bar sell confirmation all died in that gate with zero winners across every coin.
 
-I trusted that backtester. Then I found a one-line mismatch in it that cost 28% of six years of simulated profit.
+I was proud of that gate. And every single decision it ever made ran against a backtest engine that modelled stop-losses wrong.
+
+The mismatch is one line long. It was worth 28% of six years of simulated profit — and, worse, it had been quietly steering the parameter search toward configurations that only worked in the simulation.
 
 ## The mismatch
 
@@ -119,3 +121,5 @@ Cutting size on a coin because your simulator got more honest is a strange feeli
 **Fidelity beats cleverness.** I've tested a lot of strategy ideas against this bot. Trailing stops: no winners. Post-stop cooldown: no winners. Multi-bar sell confirmation: no winners, and one textbook overfit caught by the out-of-sample criterion. One boring correctness fix to the simulation moved more than all of them combined — in both directions, on every coin, permanently.
 
 The most valuable work on a trading bot isn't the strategy. It's making sure the numbers you're reading are about the thing you actually run.
+
+Which raised the next question, and it wasn't a comfortable one. The backtest now models what production is *supposed* to do — but does production actually do it? [I went looking.](/writing/auditing-my-own-trading-bot)

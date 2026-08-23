@@ -7,3 +7,6 @@ dist/
 .env.production
 .vercel
 .wrangler
+
+# Playwright MCP scratch output
+.playwright-mcp/

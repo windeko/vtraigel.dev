@@ -8,6 +8,8 @@ cover: { from: "#4E7A6B", to: "#1B2E28" }
 draft: false
 ---
 
+*Building a trading bot in public, part 4 of 4. Previously: [nine ways to lose money](/writing/auditing-my-own-trading-bot).*
+
 My trading bot is a solo project. Nobody else has ever opened a pull request on it. By any normal reasoning, its documentation should be a `README` and a shrug.
 
 Instead it has 83 documents under `docs/plans/`, a `CLAUDE.md` that is longer and far more useful than the README, four custom skills, and a `TODO.md` with a section titled *"Closed (no work needed; do NOT redo without new evidence)"*.
@@ -49,7 +51,7 @@ So `TODO.md` has a graveyard, and each grave has a re-open trigger:
 
 Re-opening requires new evidence — a new regime, a new strategy family, a new coin — not curiosity. It's the difference between institutional memory and an argument you keep losing to yourself.
 
-(And when the trigger fires, it fires. Six months later a fidelity fix to the stop-loss model changed the baseline enough that trailing stops earned a fresh sweep — which found that a *wide* 15% trail is nearly free insurance while a narrow one is a trap. The graveyard isn't a dogma. It's a bar to clear.)
+(And when the trigger fires, it fires. Six months later a [fidelity fix to the stop-loss model](/writing/backtest-lying-intrabar-stop-loss) changed the baseline enough that trailing stops earned a fresh sweep — which found that a *wide* 15% trail is nearly free insurance while a narrow one is a trap. The graveyard isn't a dogma. It's a bar to clear.)
 
 ## Turning questions into tools
 
@@ -107,8 +109,10 @@ This isn't free, and two things about it genuinely annoy me.
 
 ## The actual payoff
 
-My previous post was an audit of the money-touching layer of this bot — nine confirmed defects, ranked, each with a `file:line` and a false-positive estimate.
+[My previous post](/writing/auditing-my-own-trading-bot) was an audit of the money-touching layer of this bot — nine confirmed defects, ranked, each with a `file:line` and a false-positive estimate.
 
 That audit was possible in an afternoon because the reasoning behind every design decision was already written down. When you find something that looks wrong, the expensive question isn't "is this wrong?" — it's "is this wrong, or did I have a reason?" A repo that answers the second question is a repo you can audit instead of merely re-read.
 
 The docs weren't overhead on the work. They were the thing that made the work checkable.
+
+That's the series: [how the parameters get chosen](/writing/tuning-a-trading-bot-1120-configs), [how the measurement was wrong](/writing/backtest-lying-intrabar-stop-loss), [how the execution layer was wrong](/writing/auditing-my-own-trading-bot), and this — the part that made the other three findable.

@@ -285,6 +285,28 @@ footer{text-align:center;color:var(--muted);font-family:'JetBrains Mono',monospa
 .prose :not(pre)>code{background:var(--chip-bg);color:var(--chip-ink);padding:2px 6px;border-radius:6px}
 .prose blockquote{border-left:3px solid var(--accent);margin:1.4em 0;padding:.2em 0 .2em 1.2em;color:var(--muted)}
 .prose img{max-width:100%;border-radius:12px}
+/* Tables: numbers are the point. Mono + tabular figures on the numeric
+   (right-aligned) columns so digits line up; the table itself scrolls
+   horizontally instead of squeezing columns on narrow screens. */
+.prose table{display:block;width:max-content;min-width:100%;max-width:100%;
+  overflow-x:auto;border-collapse:collapse;margin:1.9em 0;font-size:.95rem;line-height:1.5}
+.prose thead th{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:500;
+  letter-spacing:.07em;text-transform:uppercase;color:var(--muted);white-space:nowrap;
+  padding:0 18px 11px;border-bottom:1px solid var(--line-strong);vertical-align:bottom}
+.prose tbody td{padding:11px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+.prose tbody tr:last-child td{border-bottom:0}
+.prose th:first-child,.prose td:first-child{padding-left:0}
+.prose th:last-child,.prose td:last-child{padding-right:0}
+.prose th[style*="right"],.prose td[style*="right"]{white-space:nowrap}
+.prose td[style*="right"]{font-family:'JetBrains Mono',monospace;font-size:.88rem;
+  font-variant-numeric:tabular-nums}
+.prose tbody tr:hover td{background:var(--chip-bg)}
+.prose td strong{color:var(--accent-link)}
+@media(max-width:600px){
+  .prose table{font-size:.88rem}
+  .prose thead th{padding:0 12px 10px}
+  .prose tbody td{padding:9px 12px}
+}
 .back{display:inline-block;margin-top:48px;font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--accent-link)}
 
 /* ============ 404 ============ */
