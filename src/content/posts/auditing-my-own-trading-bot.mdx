@@ -1,0 +1,167 @@
+---
+title: "I audited my own trading bot and found nine ways to lose money"
+description: "The order fills. The response never arrives. Now you own a position your database has never heard of — and it has no stop-loss. Notes from auditing, and then rebuilding, the money-touching layer of a bot I wrote."
+date: 2026-08-24
+tag: "trading-bot"
+readingTime: "11 min read"
+cover: { from: "#8C6B3F", to: "#2E2318" }
+draft: false
+---
+
+Last time I wrote about my spot trading bot, the problem was that the *backtest* was lying — it checked stop-loss once per candle while production checked every 30 seconds, and that gap was worth 28% of six years of simulated profit.
+
+Fixing the simulator raised an uglier question. The backtest now models what production is *supposed* to do. Does production actually do it?
+
+So I audited the live path. Not the strategy — the plumbing between my process and Binance's matching engine. Nine confirmed code defects, six of which could cost real money, and the worst of them had been sitting there quietly since the first day the bot traded.
+
+## The audit needed its own audit
+
+My first pass produced a list that felt great and was partly wrong.
+
+The problem with auditing your own code adversarially is that the adversarial mode has no brakes. Everything looks like a defect if you squint. "Open HTTP endpoints" made my first list — until I remembered the droplet drops inbound HTTP at the network layer, so the endpoints aren't reachable at all. Not a defect. A fantasy.
+
+So I did a second pass where every finding had to carry four fields:
+
+- **Confirmed?** — with a `file:line` I re-read, not a memory of the code.
+- **What did I miss?** — the neighbouring code that changes the picture.
+- **What already mitigates it?** — partial barriers count, even when they aren't airtight.
+- **Probability this is a false positive.**
+
+That pass deleted one finding entirely, downgraded two, and reclassified one from "code defect" to "methodology risk" (overfitting is real, but it isn't a bug you can fix in a file). What survived was shorter and load-bearing.
+
+An audit without a false-positive column isn't an audit. It's a wish list with severity numbers on it.
+
+## The one that mattered: the order that vanished
+
+Here was the buy path, in essence: call the exchange, wait for the response, then write the `Operation` record to Mongo. Exceptions are caught upstream in the tick loop.
+
+Read that again with a network in the picture. The order reaches Binance. It fills. The response never comes back — connection reset, timeout, the process gets deployed over, whatever. My code takes the exception branch and moves on.
+
+I now own the coin. My database has never heard of it.
+
+That position has no `Operation`, which means the stop-loss check — which iterates over open operations — will never look at it. It rides the entire drawdown, all the way down, forever. Meanwhile every report, every PnL number and the drawdown kill-switch are all computed off a record set that's missing a real position.
+
+The startup routine synced *balances*, so the money showed up. It never compared balances against operations, so the hole stayed open.
+
+Rated it 9/10. It's the only finding where a single unlucky TCP reset is unbounded downside.
+
+## The fix is not a bigger try/catch
+
+You cannot retry your way out of this. A retry after an ambiguous failure is how one position becomes two.
+
+The pattern that works is the one payments people have used for decades: an idempotency key, and a local record written *before* the remote call.
+
+```ts
+export function buildClientOrderId(coin: string, side: 'B' | 'S', now = Date.now()): string {
+  return `brb-${coin}-${side}-${now.toString(36)}`.slice(0, 36);
+}
+```
+
+Every order the bot places carries a `clientOrderId` it generated itself. That single string turns "did my order go through?" from an unanswerable question into a lookup — and later it turns "why did this position close?" from a guess into a fact:
+
+```ts
+export function classifyByOrderId(closing, op) {
+  if (closing.clientOrderId === op.stopClientOrderId) return 'STOP_LOSS';
+  if (closing.clientOrderId === op.exitClientOrderId) return 'SELL_SIGNAL';
+  return 'MANUAL';
+}
+```
+
+Before that ID goes anywhere near the network, the bot **claims**: it writes a `PENDING` operation carrying the `clientOrderId` and a `pendingSince` timestamp. Only then does it call the exchange. On a confirmed fill the claim is promoted to `OPEN`. On a clean rejection it's rolled back. On an *ambiguous* failure it stays `PENDING` — deliberately — and becomes the reconciler's problem.
+
+The claim also does double duty as a mutex, because of this:
+
+```ts
+OperationSchema.index(
+  { exchange: 1, coin: 1 },
+  { unique: true, partialFilterExpression: { isSold: false } },
+);
+```
+
+At most one open operation per coin, enforced by the database rather than by my hope that two ticks don't overlap. A concurrent claim gets an `E11000` duplicate-key error, and the buy aborts before the exchange call — zero USDT spent, nothing to unwind. The failure mode is a rejected write instead of a double position.
+
+## The reconciler
+
+Then a second loop, running at startup and periodically, whose whole job is to make the database agree with the exchange. Its decision function is pure and table-driven, so it's testable without a network:
+
+```ts
+export function decideReconcile(i: ReconcileInput): ReconcileAction {
+  const hasBalance = i.balanceUsdt >= i.dustUsdt;
+
+  if (i.op?.status === 'PENDING') {
+    if (i.entryOrderResolved === 'FILLED') return 'PROMOTE_PENDING';
+    const age = i.op.pendingSince ? i.now - new Date(i.op.pendingSince).getTime() : 0;
+    if (i.entryOrderResolved === 'MISSING' && age > i.pendingTtlMs) return 'REAP_PENDING';
+    return 'OK';
+  }
+
+  if (!i.op) {
+    if (!hasBalance) return 'OK';
+    return i.opFullyAttributable ? 'ADOPT_ORPHAN_BUY' : 'ALERT_ONLY';
+  }
+
+  // op is OPEN
+  if (!hasBalance) return 'CLOSE_ORPHAN_SELL';
+  return i.stopLive ? 'OK' : 'PLACE_STOP';
+}
+```
+
+Four things I'd defend in review:
+
+**Balance without an operation isn't automatically mine.** If the holding is fully attributable to the bot's own orders, adopt it and give it a stop. If it isn't, alert a human and touch nothing. A reconciler that assumes every coin in the account belongs to it will happily sell something you bought yourself.
+
+**`PENDING` has a TTL, not a verdict.** An unresolved claim isn't evidence of anything until enough time has passed for the exchange to have made up its mind.
+
+**`PLACE_STOP` is a state, not an event.** An open position without a live protective stop is a bug regardless of how it got that way — a crash between buy and stop placement, a stop cancelled by hand, an adopted orphan. The reconciler doesn't care about the history; it just makes the world match the invariant on every pass.
+
+**It shipped in shadow mode first.** `RECONCILE_MODE=shadow` logs the actions it *would* take. Only after watching that against a live account for a while did it get to `enforce`. I was not going to hand write access over a real balance to a decision table on day one.
+
+And the tick loop refuses to trade until the startup sweep is done:
+
+```ts
+await this.reconciliation.startupComplete;
+```
+
+Otherwise the first tick after a reboot can open a position while the bot still doesn't know what it already owns.
+
+## The rest of the confirmed list
+
+**Overlapping ticks.** `@nestjs/schedule` doesn't await your async callback, so a slow 30-second tick can be re-entered by the next one. Fixed with a guard set *before the first await* — a guard set after one is decoration.
+
+**Selling the whole coin balance instead of the position.** The sell path passed the wallet's total balance for that coin, not the position's amount, and `total` includes funds locked in other orders. Now the exit sizes from live free balance, rounds to the exchange's step size, and handles split fills by weighted-average price rather than pretending one fill happened.
+
+**No precision handling.** Order size was `(usdt / price).toFixed(8)`. ccxt won't round for you unless you ask — `loadMarkets()` and `amountToPrecision`, plus `minNotional` checks, are now a service, and a *missing* market catalogue blocks new buys entirely.
+
+**Stop-loss on a single live ticker print.** One bad or stale print triggered a market sell. Real stop orders now sit on the exchange, which has the pleasant side effect of protecting the position while my process is down — during a deploy, say, which is about 22 seconds of not being there.
+
+## My favourite bug: the clock
+
+Binance rejects signed requests whose timestamp falls outside the receive window — error `-1021`. If the host clock drifts, signed calls start failing.
+
+Here's the part that makes it interesting: **only some of them fail.** Fetching prices and candles is unsigned; it keeps working. The tick looks healthy. Signals get computed. The failures land on the signed path — which is where selling lives.
+
+A drifting clock silently disarms your exits while leaving your entries intact. It's an asymmetric failure that moves your bot toward taking on risk it can no longer close out of. Every monitoring signal I had would have looked fine.
+
+The fix is small: check drift against the exchange's server clock every minute, alert once per onset rather than once per check, and block new buys while drifted. That block belongs to a class I've started naming explicitly in the code — *never open what you can't close*. Clock drift is in it. So is a missing market catalogue, because without it neither the exit nor the protective stop can be sized. Existing stop-losses keep firing; only new entries get suppressed.
+
+## What I didn't fix
+
+An honest scoreboard should include the row where I'm still wrong.
+
+**PnL still ignores fees.** Profit is `sellPrice × amount − buyPrice × amount`, which overstates every trade by roughly 0.2%. That number feeds the reports and, indirectly, the drawdown kill-switch. It's on the list; it isn't done.
+
+**Metrics are still a naive Sharpe** computed over per-candle equity including flat cash bars, with break-even trades counted as losses. Distorted ranking is how a mediocre config wins a sweep.
+
+**The backtest's indicator window is 200 bars; production has about 499.** An EMA99 converges differently on the two. Small, real, unfixed.
+
+Seven of the twelve findings are closed. Four are open. One turned out not to be a defect at all: there's no hard take-profit exit — TP only fires when a sell signal lands on the same tick — and that looked like a bug until I checked the backtest and found it models exactly the same behaviour. Sim and prod agreeing on something unusual is a design decision, not a defect. Worth testing separately, not worth "fixing" in a panic.
+
+## What I'd take to any system that touches money
+
+**The dangerous bugs live in the seam, not in the logic.** Every one of my 6+ severity findings was about the boundary between my process and someone else's — a lost response, an unclaimed fill, a rounding rule I didn't own, a clock I didn't control. The strategy code, the part I'd spent months tuning, produced nothing worse than a 4/10.
+
+**Write the local record before the remote call.** Claim-before-act plus an idempotency key plus a uniqueness constraint in the database is the entire pattern. It's boring and it's thirty years old and it's what stands between you and a duplicate position.
+
+**Reconciliation is a loop, not an error handler.** You will never enumerate all the ways the two systems diverge. Write down the invariant instead, and run something that restores it on a schedule.
+
+**Prefer loud, symmetric failures.** The clock-drift bug wasn't dangerous because it broke things; it was dangerous because it broke *exactly half* of things, and the half that kept working was the half that opens positions.
