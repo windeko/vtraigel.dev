@@ -1,0 +1,121 @@
+---
+title: "My backtest was lying to me by 28%"
+description: "The simulator checked stop-loss once per candle. Production checked it every 30 seconds. Six years of results, one honest fix, and a portfolio I had to re-tune from scratch."
+date: 2026-08-24
+tag: "trading-bot"
+readingTime: "9 min read"
+cover: { from: "#C4553C", to: "#5A2418" }
+draft: false
+---
+
+I run a small spot trading bot. It polls Binance on a cron, runs an EMA/RSI signal per coin, and buys or sells with real money. Nothing exotic — the interesting part isn't the strategy, it's everything around it that decides whether the strategy's numbers mean anything.
+
+The bot ships with a backtester I'd been careful about. Deterministic given the same data file, strategy and params. Fees baked in at 0.1% per side, slippage at 0.05%. Train/out-of-sample split so I couldn't tune on the window I measured on. A six-criterion promotion gate that has rejected far more ideas than it approved — trailing stops, post-stop cooldowns, multi-bar sell confirmation all died there with zero winners across every coin.
+
+I trusted that backtester. Then I found a one-line mismatch in it that cost 28% of six years of simulated profit.
+
+## The mismatch
+
+Production checks stop-loss like this: every 30 seconds, the cron wakes up, pulls the live ticker price, and asks "are we below the stop?" — unconditionally, before any signal logic runs. If the price is under the line at any point, the position is out.
+
+The backtester checked stop-loss against the **close of the candle**.
+
+On a 1h timeframe, those are very different questions. Consider a candle that opens at 100, wicks down to 94, and closes back at 99, with a stop sitting at 95. Production stopped out somewhere in the middle of that hour and booked the loss. The backtest looked at the close, saw 99, and reported a position that was never touched. A stop-out in reality; a phantom survival in the simulation.
+
+I didn't build the fix first. I counted first — a cheap proxy over the historical data: bars where the low breaches the stop threshold but the close doesn't.
+
+| Coin | Stop-loss | Phantom-survive bars per year (2025–26) |
+|------|----------:|----------------------------------------:|
+| DASH | 3% | 212 |
+| SOL | 2% | 183 |
+| DOT | 3% | 63 |
+| FET | 4% | 63 |
+| LTC | 3% | 61 |
+| UNI | 4% | 47 |
+| BTC / TRX | 4% | 2–5 |
+
+Two hundred phantom survivals a year on a single coin. The bug wasn't uniform either — it was concentrated exactly on the tight-stop configs, which mattered more than I realised at the time.
+
+## The fix, and the part everyone gets wrong
+
+Detecting the stop on the candle's low is the obvious half. The fill price is the half worth thinking about:
+
+```ts
+if (params.intrabarStopLoss) {
+  const low = candlesByCoin[coin][t][3];
+  if (isStopLossHit(low, { buyPrice: pos.buyPrice }, strategy.config)) {
+    const open = candlesByCoin[coin][t][1];
+    const fill = Math.min(open, stopLossPrice(pos.buyPrice, strategy.config));
+    portfolio.sell(coin, fill, t, 'STOP_LOSS');
+    continue;
+  }
+}
+```
+
+`Math.min(open, stopLossPrice)` is the line that models reality. If the bar gapped open *below* the stop, my 30-second poll would have fired near that open — not politely at the stop level. Filling at the stop price in that case would have been a second, smaller lie layered on top of the first one. Four engine tests pin the behaviour: wick exit at the stop price, gap-down fill at the open, full-bar-below-threshold, and the legacy close-only path still intact behind a default-off flag.
+
+I deliberately did **not** give take-profit the same treatment. In production, a take-profit exit also requires a live sell signal — five gates deep, rarely simultaneous with an intrabar touch. Modelling TP intrabar would need previous-bar signal semantics, a methodology fork that would break comparability with every result I'd already recorded. Leaving TP on close-only biases the backtest *pessimistic*, and when I can't model something exactly, I want the error pointing at the safe side.
+
+## The damage
+
+Same configs, same data, same six years. Only the stop-loss model changed.
+
+| | Close-only stop | Intrabar stop | Δ |
+|---|---:|---:|---:|
+| 6y PnL | +50.08% | +36.24% | **−28%** |
+| Trades | 2,494 | 2,814 | +13% |
+| 2024 | +9,233 | +7,730 | −16% |
+| 2025 | +11,145 | +7,457 | **−33%** |
+| 2022 (bear) | −2,796 | −5,131 | 84% worse |
+
+Per coin, the spread was brutal:
+
+| Coin | Stop | 6y PnL before | 6y PnL after | Sharpe |
+|------|-----:|--------------:|-------------:|-------:|
+| SOL | 2% | +7,923 | +1,413 | 1.30 → 0.36 |
+| FET | 4% | +2,535 | **−926** | 0.44 → −0.12 |
+| ONDO | 5% | +1,235 | +398 | 0.99 → 0.38 |
+| LTC | 3% | +3,467 | +1,442 | 0.49 → 0.25 |
+| BTC | 4% | +3,069 | +2,313 | 0.65 → 0.51 |
+| DASH | 3% | +5,422 | +5,311 | 0.75 (flat) |
+| DOGE | 5% | +11,166 | +12,116 | 0.59 → 0.63 |
+
+SOL lost 82% of its simulated profit. FET went from a profitable slot to a losing one. SOL's 2022 slid from −0.44% to −14.21% — it would have failed the bear-year gate it had never actually been subjected to.
+
+And DOGE got *better*, which is the detail that convinced me the new model was right rather than just gloomier. When a bar closes below the stop, the close-only model filled at that worse close; the intrabar model fills at the stop level. For wide-stop coins, that fill-price correction outweighs the extra stop-outs. A model that only ever made things worse would have been suspicious. This one moved results in both directions, for reasons I could trace.
+
+## The finding that actually mattered
+
+My first instinct was to treat this as a haircut: same portfolio, lower expectations, move on.
+
+That instinct was wrong, and it took me an embarrassing beat to see why. **Every parameter in production had been selected by sweeps running on the broken model.** Tight stops didn't just look better than they were — they won their sweeps *because* phantom wick-survival was free in the simulation. The stop-loss values in my config weren't merely optimistic. They were selected *for* the bug.
+
+So I re-ran the whole search: 1,120 configs per coin, twelve coins, sequentially, under the honest model, benchmarked against the current production config on the same honest model.
+
+Five coins promoted new configs, and they all moved in the same direction: **wider stop, quicker take-profit, deeper retrace on entry.** SOL's stop went 2% → 4%, LTC's 3% → 5%. Take-profits came down: LINK 10% → 5%, LTC 7% → 3%, SOL 5% → 3%. ONDO changed strategy family outright.
+
+The tell was in the two coins that barely moved. TRX and DASH lost 13% and 2% to the correction — nothing, compared to SOL's 82%. Both were already sitting on the wide-stop/quick-TP shape. They were the coins whose parameters had never depended on the bug, so honest simulation had nothing to take away from them.
+
+After promotions, six-year PnL recovered from +36.24% to +39.73%, and the bear-year loss more than halved, from −5,131 to −2,222. Still well below the +50.08% I thought I had. That gap was never profit; it was measurement error I'd been reading as profit.
+
+## Three coins had no answer at all
+
+Three coins produced **zero** winners out of 1,120 configs each — nothing in the family passed the gate under honest simulation.
+
+BTC's candidates were all strong on train and negative on forward: a regime break, not a tuning problem. DOT sat at forward −3.14%. UNI was the uncomfortable one: forward −9.90%, and a 2022 loss of −13.66% that fails my own −10% bear-year gate. Worse, UNI had been *promoted to the largest position tier* three weeks earlier on the strength of a "+2.95% 2026" number — a close-only number. Under honest simulation that year is negative.
+
+So the position sizes moved instead of the parameters. UNI cut from the top tier to the minimum, BTC down to minimum as a portfolio anchor, DOGE down a tier — its profit is real but concentrated in a single year, which the top tier didn't deserve. DOT stayed at minimum, where it already was.
+
+Cutting size on a coin because your simulator got more honest is a strange feeling. It's also the only correct response.
+
+## What I took from it
+
+**Every simulator is optimistic in a direction. Find yours and name it.** Mine was: intra-candle price movement doesn't exist. That's a modelling choice I never consciously made — it was implicit in reading `candle.close`, which is the kind of decision that never gets reviewed because it never looks like a decision.
+
+**When you fix a fidelity bug, re-run the search, not just the numbers.** Re-reading old results under a new model tells you how wrong you were. It doesn't fix anything. The parameters themselves were artifacts of the broken model, and no amount of re-reading turns a selected-for-the-bug config into a good one.
+
+**Prefer the model that errs conservative when you can't model exactly.** Intrabar mode slightly *overestimates* stop frequency — a 30-second poll can miss a sub-30-second wick that the candle low records. Truth sits between the two models, much closer to intrabar. I'd rather be a little too pessimistic about my own bot than a little too optimistic.
+
+**Fidelity beats cleverness.** I've tested a lot of strategy ideas against this bot. Trailing stops: no winners. Post-stop cooldown: no winners. Multi-bar sell confirmation: no winners, and one textbook overfit caught by the out-of-sample criterion. One boring correctness fix to the simulation moved more than all of them combined — in both directions, on every coin, permanently.
+
+The most valuable work on a trading bot isn't the strategy. It's making sure the numbers you're reading are about the thing you actually run.
