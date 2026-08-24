@@ -3,8 +3,16 @@
 Prompts for generating per-post cover images with an external image model.
 Palette is locked to the site tokens in `src/styles/global.css` — don't drift it.
 
-**Generate at 3:2 (e.g. 1536×1024).** The card frame is 3:2, so nothing gets
-cropped; it also crops cleanly to the 1200×630 OG image.
+**Direction: tactile analog instruments.** Every cover is a warm still life of
+real, recognisable objects on a workbench — chart recorders, brass fittings,
+card catalogues, stone-splitting wedges. Not diagrams, not metaphors rendered
+as geometry. If a reader can't name the objects in the picture, the prompt has
+failed.
+
+**Generate at 3:2 (e.g. 1536×1024).** The card frame and the post hero are both
+3:2, so nothing is cropped; it also crops cleanly to the 1200×630 OG image.
+The caption always sits below the image, never over it — compose for the whole
+frame.
 
 Drop a finished file in `src/assets/covers/` and name it in the post's
 frontmatter — the card renders it instead of the gradient, and nothing else
@@ -15,7 +23,7 @@ cover:
   from: "#C4553C"
   to: "#5A2418"
   image: "../../assets/covers/backtest-lying-intrabar-stop-loss.png"
-  alt: "Two price traces at different resolutions diverging across a threshold line"
+  alt: "A paper chart recorder, its pen mid-stroke, a red line struck across the printout"
 ```
 
 Keep `from`/`to` either way — they still drive the OG accent strip.
@@ -26,63 +34,70 @@ Keep `from`/`to` either way — they still drive the OG accent strip.
 
 Prepend this to every prompt below.
 
-> Abstract editorial cover illustration for a software-engineering blog. Flat,
-> vector-adjacent digital art with a fine film grain — no photorealism, no 3D
-> render gloss, no neon cyberpunk, no lens flare. Warm analog-technical mood,
-> like a drafting table rather than a dashboard: matte oat-paper ground
-> `#F3EFE6`, deep espresso linework `#23201B`, one marigold accent `#C0801C`
-> used sparingly for the single thing that matters. Precise geometry — thin
-> rules, plotted curves, measured grids, honest alignment. Generous negative
-> space. The caption sits below the image, never over it, so the whole frame
-> stays visible — compose for all of it. No text, no letters, no
-> numbers, no logos, no UI chrome, no people, no hands, no screens.
+> A warm, tactile still life of real analog engineering instruments,
+> photographed like an editorial magazine feature: one soft directional light
+> from the upper left, gentle falloff into shadow, shallow depth of field with
+> the key object sharp and the background falling away. Everything rests on
+> aged oak, machined steel, or warm oat paper.
+>
+> Strict palette — matte oat and parchment (`#F3EFE6`), deep espresso brown and
+> near-black (`#23201B`), brass and marigold highlights (`#C0801C`). No cool
+> blues, no cold greys, no neon, no teal-and-orange grading.
+>
+> Real materials showing real wear: brushed brass, chipped enamel, fibrous
+> paper, machined steel, dried ink, worn wood. Objects are the entire subject —
+> no people, no hands, no computer screens, no phones, no modern plastic.
+> No lettering, no words, no logos, no readable numerals; incidental dial ticks
+> and scale marks are fine and welcome.
+>
+> Fine film grain. No HDR, no glossy 3D-render sheen, no lens flare.
 
 ---
 
 ## 1,120 configs per coin: how I actually tuned a trading bot
 `tuning-a-trading-bot-1120-configs` · duotone `#C0801C` → `#6E4610`
 
-> Subject: a vast parameter search space with almost no survivors. A dense
-> orthogonal field of small squares — hundreds of them, evenly spaced, most
-> rendered in flat muted espresso at low contrast. Six or seven squares,
-> scattered irregularly and never adjacent, are filled solid marigold and ringed
-> with a thin halo. Behind the field, very faint plotted equity curves run left
-> to right, mostly ghosted away. Duotone warm marigold `#C0801C` into deep brown
-> `#6E4610` over oat paper. The feeling is a sieve, not a celebration.
+> Subject: a typesetter's tray or machinist's drawer, pulled open on a
+> workbench, divided into hundreds of small square compartments in a strict
+> grid. Almost every compartment holds an identical dull, tarnished brass slug.
+> Six or seven slugs, scattered irregularly and never adjacent, have been
+> polished to a bright warm shine and catch the light. A jeweller's loupe rests
+> on the tray's edge. A few compartments are empty. The feeling is a sieve that
+> almost nothing survived — patient, unglamorous sorting work.
 
 ## My backtest was lying to me by 28%
 `backtest-lying-intrabar-stop-loss` · duotone `#C4553C` → `#5A2418`
 
-> Subject: the same price path drawn at two resolutions, diverging. Two line
-> traces begin overlapped at the left edge: one coarse and blocky, stepping in
-> large rectangular increments; one fine and continuous, sampling far more
-> often. They separate progressively toward the right, the gap between them
-> shaded as a soft wedge. A single thin horizontal marigold rule crosses the
-> composition — the fine line pierces it, the blocky line steps clean over it
-> without touching. Duotone rust `#C4553C` into dark oxblood `#5A2418` over oat
-> paper.
+> Subject: a paper strip-chart recorder on a warm oak desk, its inked pen
+> caught mid-stroke, a long printed trace spilling off the platen and curling
+> onto the desk. A second, older printout lies beneath it, its trace drawn in
+> coarse rectangular steps where the newer one is fine and continuous — the two
+> visibly diverging toward the right. A mechanical stopwatch sits beside the
+> platen, its hand near the half-minute. A red grease pencil lies where it was
+> set down, and a single hard red line has been struck across the printout at
+> the point where the fine trace dips below and the stepped one does not.
 
 ## I audited my own trading bot and found nine ways to lose money
 `auditing-my-own-trading-bot` · duotone `#8C6B3F` → `#2E2318`
 
-> Subject: an exploded technical schematic of a money-handling pipeline. Thin
-> espresso lines connect a chain of simple geometric nodes — circles, squares,
-> a valve, a junction — laid out like an engineering diagram with faint
-> dimension marks. Several joints are circled in marigold as flagged faults. At
-> one point the line simply stops: a connector ends in open space with nothing
-> on the other side, and a small marigold arrow continues past it into blank
-> paper. Duotone bronze `#8C6B3F` into near-black brown `#2E2318` over oat
-> paper.
+> Subject: a brass mechanical instrument opened up for inspection on a
+> workbench, its cover unscrewed and set aside, internals exposed — gears,
+> valves, a manifold of small pipe fittings. Several joints have been ringed
+> with marigold inspection chalk. One brass fitting hangs disconnected, its
+> union nut backed off, the line beyond it going nowhere. Inspection tools lie
+> in use around it: vernier calipers, a loupe, a small inspection mirror on a
+> stalk, a scatter of removed screws. Methodical, unhurried, faintly damning.
 
 ## Writing a repo for a reader with no memory
 `writing-a-repo-for-a-reader-with-no-memory` · duotone `#4E7A6B` → `#1B2E28`
 
-> Subject: an archive built for someone who arrives knowing nothing. A wall of
-> thin vertical document edges seen nearly side-on — dozens of sheets stacked
-> in a long shallow row, receding slightly, drawn as fine parallel espresso
-> rules. One sheet is pulled forward from the stack and lit in marigold, casting
-> a soft warm glow onto its neighbours. Everything else is quiet and uniform.
-> Duotone muted pine green `#4E7A6B` into deep forest `#1B2E28` over oat paper.
+> Subject: a library card catalogue — a wall of narrow oak drawers with brass
+> label holders and pull rods. One drawer is pulled fully open, dense with
+> hand-typed index cards packed edge to edge, their top corners softened from
+> handling. A single card has been lifted proud of the others and catches the
+> light. A rubber date stamp and a well-used ink pad sit on the cabinet top.
+> Everything else recedes into quiet, uniform shadow. An archive built for
+> somebody who arrives knowing nothing at all.
 
 ---
 
@@ -91,30 +106,29 @@ Prepend this to every prompt below.
 ## Running Claude Code + Codex as a dual-agent setup
 `dual-agent-claude-code-codex` · duotone `#C88A2C` → `#6E4610`
 
-> Subject: two independent observers whose disagreement is the point. Two large
-> thin-outlined circles overlap slightly off-centre, each filled with a
-> different fine texture — one a dot grid, one a hatch of parallel lines. Only
-> the lens-shaped intersection is marigold, and inside it the two textures
-> interfere into a moiré. Calm, symmetrical, almost instrument-like. Duotone
-> amber `#C88A2C` into deep brown `#6E4610` over oat paper.
+> Subject: a photographer's light table with a contact sheet laid across it,
+> and two identical brass loupes standing on two different frames of the same
+> sheet. Each loupe magnifies its frame sharply; the two frames look nearly but
+> not quite identical. A red chinagraph pencil has circled one frame and left
+> the other alone. Warm light glowing up through the sheet from below. Two
+> independent readings of the same evidence, and one disagreement worth having.
 
 ## Wiring MCP into a production agent, the parts that bite
 `mcp-in-production` · duotone `#3A4A55` → `#141A20` (cool — the one exception)
 
-> Subject: a connector panel under real load. A neat array of identical circular
-> ports drawn in thin line, most with cables seated and running off-frame in
-> orderly curves. Two ports sit empty; one cable hangs loose and unplugged, its
-> free end drifting, drawn in marigold. Slight asymmetry — the tidy grid has
-> been disturbed. Duotone cool slate `#3A4A55` into near-black `#141A20` over
-> oat paper, with the marigold `#C0801C` accent kept warm against the cool
-> field.
+> Subject: a vintage telephone switchboard patch bay in brass and dark bakelite,
+> a neat array of jack sockets with cloth-covered cables seated in most of them,
+> curving away off-frame in orderly loops. Two sockets sit empty. One cable has
+> pulled free and hangs slack, its brass plug swinging clear of the panel. The
+> tidy grid has been disturbed. For this one post only, let the surrounding
+> tones run cool — slate and near-black — and keep the brass warm against it.
 
 ## Splitting a monolith with Pulumi, without downtime
 `monolith-to-microservices-pulumi` · duotone `#B5623C` → `#5E2A16`
 
-> Subject: one solid mass parting along its seams. A single large block drawn in
-> clean axonometric projection separates into four or five smaller blocks that
-> drift apart along straight paths, still clearly cut from the same body. The
-> cut faces glow marigold; the outer surfaces stay matte. Thin construction
-> lines trace where each piece came from. Duotone terracotta `#B5623C` into dark
-> brick `#5E2A16` over oat paper.
+> Subject: a single large block of stone on a mason's bench, being split the
+> traditional way: a line of drilled holes across its face, steel feathers and
+> wedges seated in each one, a hammer set down beside them. The first crack has
+> just opened along the line — clean, following exactly where it was scored.
+> Marigold chalk marks the remaining cuts still to come. Stone dust on the
+> bench. The work of deciding where the seam goes, before any force is applied.
