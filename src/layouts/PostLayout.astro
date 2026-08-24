@@ -64,7 +64,14 @@ const next = series ? atPart(series.part + 1) : undefined;
         </div>
         <div class="cover">
           {cover.image ? (
-            <Image src={cover.image} alt={cover.alt ?? ''} widths={[480, 720, 1000]} sizes="(max-width:900px) 100vw, 470px" />
+            <Image
+              src={cover.image}
+              alt={cover.alt ?? ''}
+              widths={[480, 720, 1000]}
+              sizes="(max-width:900px) 100vw, 470px"
+              loading="eager"
+              fetchpriority="high"
+            />
           ) : (
             <div class="grad" style={`--g1:${cover.from};--g2:${cover.to}`}></div>
           )}
