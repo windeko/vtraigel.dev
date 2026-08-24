@@ -1,4 +1,7 @@
 ---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
 interface Props {
   href: string;
   title: string;
@@ -7,16 +10,31 @@ interface Props {
   readingTime?: string;
   from: string;
   to: string;
+  image?: ImageMetadata;
+  alt?: string;
 }
-const { href, title, tag, date, readingTime, from, to } = Astro.props;
-const meta =
-  date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) +
-  (readingTime ? ` · ${readingTime}` : '');
+const { href, title, tag, date, readingTime, from, to, image, alt } = Astro.props;
+const month = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 ---
-<a class="plaque" href={href} style={`--g1:${from};--g2:${to}`}>
-  <span class="ptag">{tag}</span>
-  <div class="pcap">
-    <h3>{title}</h3>
-    <div class="pmeta">{meta}</div>
+<a class="plaque" href={href} data-tag={tag} style={`--g1:${from};--g2:${to}`}>
+  <div class="shot">
+    {image ? (
+      <Image src={image} alt={alt ?? ''} widths={[420, 640, 900]} sizes="(max-width:640px) 100vw, 500px" />
+    ) : (
+      <div class="grad"></div>
+    )}
   </div>
+  <div class="pmeta">
+    <span class="tg"><i></i>{tag}</span>
+    <span class="sep">/</span>
+    <span>{month}</span>
+    {readingTime && (
+      <>
+        <span class="sep">/</span>
+        <span>{readingTime}</span>
+      </>
+    )}
+  </div>
+  <h3>{title}</h3>
+  <div class="prule"></div>
 </a>

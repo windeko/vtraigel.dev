@@ -24,10 +24,10 @@ const fmt = (d: Date) =>
 
       <div class="posts">
         {posts.map((p) => (
-          <a class="post" href={`/writing/${p.id}`}>
+          <a class="post" href={`/writing/${p.id}`} data-tag={p.data.tag}>
             <span class="date">{fmt(p.data.date)}</span>
             <span class="t">{p.data.title}</span>
-            <span class="tag">{p.data.tag}</span>
+            <span class="tag"><i></i>{p.data.tag}</span>
           </a>
         ))}
       </div>

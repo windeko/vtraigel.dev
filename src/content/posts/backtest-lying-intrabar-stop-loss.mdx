@@ -5,10 +5,13 @@ date: 2026-08-22
 tag: "trading-bot"
 readingTime: "9 min read"
 cover: { from: "#C4553C", to: "#5A2418" }
+series:
+  name: "Building a trading bot in public"
+  part: 2
+  of: 4
 draft: false
 ---
 
-*Building a trading bot in public, part 2 of 4. Previously: [1,120 configs per coin](/writing/tuning-a-trading-bot-1120-configs). Next: [nine ways to lose money](/writing/auditing-my-own-trading-bot).*
 
 [Last time](/writing/tuning-a-trading-bot-1120-configs) I described the apparatus I use to pick this bot's parameters: 1,120 configs per coin, four data windows with four different jobs, pass criteria frozen in a design doc before any of it runs, and a relaxation ladder for when nothing passes. Trailing stops, post-stop cooldowns and multi-bar sell confirmation all died in that gate with zero winners across every coin.
 

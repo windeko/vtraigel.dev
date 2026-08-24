@@ -5,10 +5,13 @@ date: 2026-08-23
 tag: "trading-bot"
 readingTime: "11 min read"
 cover: { from: "#8C6B3F", to: "#2E2318" }
+series:
+  name: "Building a trading bot in public"
+  part: 3
+  of: 4
 draft: false
 ---
 
-*Building a trading bot in public, part 3 of 4. Previously: [my backtest was lying to me by 28%](/writing/backtest-lying-intrabar-stop-loss). Next: [writing a repo for a reader with no memory](/writing/writing-a-repo-for-a-reader-with-no-memory).*
 
 [Last time](/writing/backtest-lying-intrabar-stop-loss), the problem was that the *backtest* was lying — it checked stop-loss once per candle while production checked every 30 seconds, and that gap was worth 28% of six years of simulated profit.
 
