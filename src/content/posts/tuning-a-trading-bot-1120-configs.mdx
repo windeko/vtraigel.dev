@@ -1,0 +1,145 @@
+---
+title: "1,120 configs per coin: how I actually tuned a trading bot"
+description: "The grid, the data splits, the pass criteria I froze before running anything, and the relaxation ladder for when nothing passes. Parameter search is the easy half — the gate is the product."
+date: 2026-08-21
+tag: "trading-bot"
+readingTime: "12 min read"
+cover:
+  from: "#C0801C"
+  to: "#6E4610"
+  image: ../../assets/covers/tuning-a-trading-bot-1120-configs.jpg
+  alt: "A printer's type case shot from directly above, hundreds of compartments holding dull tarnished slugs, six of them polished to a bright shine, a jeweller's loupe resting on the frame"
+series:
+  name: "Building a trading bot in public"
+  part: 1
+  of: 4
+draft: false
+---
+
+
+The bot started with one configuration for every coin: a 7/99 EMA crossover, RSI-14 with a threshold of 50, a 2% stop-loss and a 3% take-profit.
+
+Those numbers weren't derived from anything. They were a plausible-looking starting point, applied uniformly to BTC and DOGE as if those were the same instrument. Everything since has been the work of replacing guesses with numbers I can defend — and, more importantly, building a process that can tell me when a number *isn't* defensible.
+
+This post is that process: the search space, the splits, the criteria, and the parts designed specifically to stop me from fooling myself. It's the least glamorous part of building a trading bot and the only part that decides whether any of it means anything.
+
+## The naive version, which I did first
+
+Load six years of hourly candles. Sweep stop-loss and take-profit. Rank by Sharpe. Take the winner.
+
+It works, in the sense that it produces a number that's higher than the number you started with. What it can't tell you is whether that config is *good* or merely *lucky on this particular history*. With hundreds of candidates and one dataset, some config wins by noise alone — that's not a risk, it's arithmetic. And every additional round of "best Sharpe on the same six years" compounds it, because you're also selecting the *shape* of the search that produced a winner.
+
+I'd also already promoted one parameter change picked exactly that way. So the first real methodology decision wasn't about parameters at all. It was: stop tuning until there's something to check the tuning against.
+
+## Splitting the data
+
+The first split was the standard one: tune on 2020-04 → 2024-12, validate on 2025-01 → now. Parameters get chosen on train; the hold-out only ever gets *scored*, never optimized against. A candidate that improves train and regresses out-of-sample is rejected, no matter how good the training numbers look.
+
+The second version is where it gets opinionated, so let me state the uncomfortable part plainly: **2022 is excluded from parameter selection.**
+
+2022 is the only proper bear market in the data. Excluding it from training is, literally, fitting to a favourable regime. I did it anyway, because including it dominates the ranking — a trend-following strategy in a year-long downtrend mostly loses, so ranking by Sharpe over a window containing 2022 mostly ranks *how little a config trades*, not how well it trades.
+
+The compensation is that 2022 doesn't disappear, it changes role: it becomes a **gate**. Configs are chosen without it and then must survive it. A winner whose 2022 loss is worse than −10% of capital is rejected outright, no matter how good the rest looks. Selection excludes the bear year; acceptance requires it.
+
+So each sweep runs against four windows with four different jobs:
+
+| Window | Range | Role |
+|---|---|---|
+| Train | 2023 + 2024 | Ranking only |
+| Forward | 2025 → now | Hold-out — never seen during ranking |
+| Regime | data start → 2021 | Sanity floor: PnL ≥ 0, "didn't blow up in the old regime" |
+| 2022 | 2022 | Bear-resilience gate, ≥ −10% of capital |
+
+Plus a per-year floor over {2020, 2021, 2023, 2024, 2025}, because a config can pass every aggregate and still contain one catastrophic year.
+
+## The grid
+
+Three strategy families, each with its own parameter axes:
+
+```
+ema-rsi         SL{2,3,4,5} × TP{3,5,7,10} × trend{off,200/0%,200/10%,200/20%,200/30%} × gap{0,0.5,1}   = 240
+ema-rsi-volume  … × volume multiplier{1.0,1.5,2.0}                                                       = 720
+bollinger       SL{2,3,4,5} × TP{3,5,7,10} × RSI{30/70,25/75} × trend{5 options}                          = 160
+                                                                                                    total 1,120
+```
+
+The knobs, briefly: the **trend filter** requires price above its 200-period average, with a tolerance band so a coin isn't locked out by a shallow dip. The **gap ratio** controls how far the fast EMA must sit below the slow one before a buy is allowed — deeper retrace versus quicker re-entry. The **volume multiplier** demands the entry candle carry more volume than its recent average.
+
+1,120 configs per coin, twelve coins, roughly half an hour per coin when the sweep runs alone. Which raises the obvious problem: **1,120 chances for something to win by accident.**
+
+## The two things that stop the accident
+
+**Rank on the worse half, not the average.** Train is 2023 and 2024, and candidates are ranked by `min(sharpe_2023, sharpe_2024)` rather than the aggregate. A config that was brilliant in 2024 and mediocre in 2023 has a mediocre score. It's a cheap, blunt consistency filter, and it kills the single most common flavour of accidental winner: the one that found one very good stretch.
+
+**Freeze the pass criteria before the run.** This is the rule I'd defend hardest, because it addresses the failure mode that a hold-out can't:
+
+> If we let ourselves tweak the pass criteria after looking at results until a winner appears, we're back to fitting — just at a different level.
+
+A hold-out protects against overfitting the parameters. Nothing protects against overfitting the *selection rule* except writing it down first. So the criteria live in a design document that predates the run:
+
+1. Forward Sharpe > 1, forward PnL ≥ 0, regime PnL ≥ 0, every per-year PnL ≥ 0.
+2. …relax the per-year floor to tolerate one down year.
+3. …drop the forward Sharpe > 1 requirement, keep forward PnL ≥ 0.
+4. No winner. Report it, promote nothing.
+
+That's a **relaxation ladder**, and it's the practical answer to "what if nothing passes?" — which is a real thing that happens and the exact moment temptation shows up. The rungs are fixed in advance, they're taken in order, and the results document names which rung the winner came off. A step-0 winner is a strong result. A step-2 winner is a weak one wearing the same clothes, and the doc says so.
+
+Then there's the rung I use most: **keep production**. Every sweep prints the current live config's numbers on the same splits, so the comparison isn't "is this candidate good" but "is this candidate better than what's already running". Several sweeps have ended with the winner beating production by a rounding error at twice the drawdown. Production stays.
+
+## What came out
+
+Twelve coins, each with its own family and parameters, none of it designed by me — the gate picked all of it:
+
+| Coin | Family | Stop | Take-profit | Notes |
+|---|---|---:|---:|---|
+| BTC | ema-rsi-volume | 4% | 5% | trend filter 200 / 10% |
+| ETH | ema-rsi-volume | 5% | 5% | gap gate disabled |
+| SOL | ema-rsi-volume | 4% | 3% | volume 1.5× |
+| TRX | bollinger | 4% | 10% | RSI 25/75 — healthiest coin in the portfolio |
+| DASH | ema-rsi-volume | 3% | 3% | already sat on the "honest" shape |
+| ONDO | ema-rsi-volume | 2% | 7% | switched families mid-life |
+| LTC | ema-rsi | 5% | 3% | plain family won |
+| DOGE | ema-rsi-volume | 5% | 7% | no trend filter, wide 15% trail |
+
+Two things about that table are worth more than the numbers in it.
+
+**Different coins want different families.** Mean reversion at the Bollinger bands wins on TRX; trend-following with a volume filter wins on the majors. I didn't have a thesis about which coin is which. The sweep did it, and it did it per coin, which is only possible because the strategy family is a parameter like any other.
+
+**Position size is a separate decision from parameters.** Coins sit in tiers — the strongest at 4,000 USDT per trade, the yellow-zone ones at 2,000 — set by how much evidence backs the config, not by how much I like the coin. It's the one knob I turn when the answer is "this config is probably fine but I don't fully trust it", which is a much more common state than either confidence or rejection.
+
+## The results, stated carefully
+
+Running every coin's promoted config over six continuous years — twelve coins, fees at 0.1% and slippage at 0.05% per side — the portfolio does **+39.73%**, with the bear year contained at roughly −2,200 on a ~120k simulated book.
+
+That number deserves three asterisks, and I'd rather supply them myself.
+
+It's a simulation. Every promoted config was chosen partly on the same history it's measured against, which biases the result upward no matter how many gates it passed. The coin universe consists of coins that survived to 2026 and are listed on Binance, which quietly excludes the ones that died — survivorship, and in crypto it's not a small effect. And one forward hold-out is one sample of one regime; a config that survived 2025 has not been tested against a regime nobody has seen yet.
+
+The only honest test is forward performance, which is why the bot now tracks realized PnL against the projection in its own reviews. Everything above is a filter for *what deserves to be tried with real money*, not a prediction of what it will earn.
+
+## What the process rejected
+
+The gate's real output is the graveyard, and it's bigger than the portfolio:
+
+- **Trailing stops** — five values, four coins. No winners; they surrender the trending-tail upside the strategy lives on.
+- **Post-stop cooldown** — five values. No winners. The entry gates already space trades further apart than any cooldown would bind on.
+- **Multi-bar sell confirmation** — seven coins, no winners, including one config whose training Sharpe went up 2.6× while its forward Sharpe collapsed from 1.15 to 0.17. Textbook overfit, caught by the decay criterion, which is exactly the day that criterion paid for itself.
+- **Mean-reversion exits** and **scale-out take-profits** — both lose to a fixed take-profit, the scale-out at essentially zero drawdown benefit.
+- **Correlation-aware sizing** — no help.
+- **Volatility-targeted sizing** — works, but it's a genuine trade-off rather than a free win, so it stayed on the shelf.
+
+Two things did survive. **ATR-adaptive stops** improved both profit *and* drawdown, which is rare enough that I re-checked it before promoting. And trailing stops came back from the dead: after a later fix changed the baseline, a re-sweep found that a *wide* 15% trail is nearly free insurance while the narrow ones remain the trap they always were. A closed question can reopen — but on new evidence, not on the fact that I liked the idea.
+
+## What I'd tell someone starting this
+
+**The sweep is the easy half.** Grid search is a nested loop. The gate — what counts as a winner, decided before you look — is the entire product.
+
+**Write the criteria down before you run anything**, and when nothing passes, walk a ladder you wrote in advance instead of improvising a reason why the best candidate is good enough.
+
+**Rank on your worst sub-window.** Averages hide the exact failure you care about.
+
+**Log the rejections as carefully as the promotions.** Six months later, "we tried trailing stops" is worthless and "we tried five trail values on four coins under train/forward and none passed, here are the tables" is a decision you never have to make twice.
+
+**None of it saves you from a bad universe.** Careful selection inside a survivorship-biased coin list produces careful selection inside a survivorship-biased coin list.
+
+And there's a failure mode this whole apparatus can't see, which took me another six months to find. Every gate above ran against a backtest engine that checked stop-losses once per candle, while production checks them every thirty seconds — and that single mismatch was worth 28% of the portfolio's simulated profit. [That's the next post.](/writing/backtest-lying-intrabar-stop-loss)

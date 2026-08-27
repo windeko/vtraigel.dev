@@ -6,6 +6,8 @@ import { getCollection } from 'astro:content';
 const posts = (await getCollection('posts', ({ data }) => !data.draft)).sort(
   (a, b) => b.data.date.getTime() - a.data.date.getTime()
 );
+const tags = [...new Set(posts.map((p) => p.data.tag))].sort();
+const countOf = (tag: string) => posts.filter((p) => p.data.tag === tag).length;
 ---
 <BaseLayout
   title="Writing — Vladimir Traigel"
@@ -23,20 +25,60 @@ const posts = (await getCollection('posts', ({ data }) => !data.draft)).sort(
       {posts.length === 0 ? (
         <p style="color:var(--muted);padding-bottom:80px">First posts coming soon.</p>
       ) : (
-        <div class="pgrid" style="padding-bottom:80px">
-          {posts.map((p) => (
-            <PlaqueCard
-              href={`/writing/${p.id}`}
-              title={p.data.title}
-              tag={p.data.tag}
-              date={p.data.date}
-              readingTime={p.data.readingTime}
-              from={p.data.cover.from}
-              to={p.data.cover.to}
-            />
-          ))}
-        </div>
+        <>
+          <div class="rail">
+            <div class="chips">
+              <button class="chip" type="button" data-filter="all" aria-pressed="true">
+                <span class="dot"></span><span>All</span><span class="n">{posts.length}</span>
+              </button>
+              {tags.map((tag) => (
+                <button class="chip" type="button" data-filter={tag} data-tag={tag} aria-pressed="false">
+                  <span class="dot"></span><span>{tag}</span><span class="n">{countOf(tag)}</span>
+                </button>
+              ))}
+            </div>
+            <div class="count" data-count>{posts.length} posts</div>
+          </div>
+          <div class="pgrid" style="padding:44px 0 80px">
+            {posts.map((p) => (
+              <PlaqueCard
+                href={`/writing/${p.id}`}
+                title={p.data.title}
+                tag={p.data.tag}
+                date={p.data.date}
+                readingTime={p.data.readingTime}
+                from={p.data.cover.from}
+                to={p.data.cover.to}
+                image={p.data.cover.image}
+                alt={p.data.cover.alt}
+              />
+            ))}
+          </div>
+        </>
       )}
     </div>
   </main>
 </BaseLayout>
+
+<script>
+  // Filter is progressive enhancement: with no JS every post stays visible.
+  const rail = document.querySelector<HTMLElement>('.rail');
+  const count = rail?.querySelector<HTMLElement>('[data-count]');
+  if (rail && count) {
+    const chips = Array.from(rail.querySelectorAll<HTMLButtonElement>('.chip'));
+    const cards = Array.from(document.querySelectorAll<HTMLElement>('.pgrid .plaque'));
+    rail.addEventListener('click', (e) => {
+      const chip = (e.target as HTMLElement).closest<HTMLButtonElement>('.chip');
+      if (!chip) return;
+      const want = chip.dataset.filter;
+      chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+      let shown = 0;
+      cards.forEach((card) => {
+        const on = want === 'all' || card.dataset.tag === want;
+        card.hidden = !on;
+        if (on) shown += 1;
+      });
+      count.textContent = `${shown} ${shown === 1 ? 'post' : 'posts'}`;
+    });
+  }
+</script>

@@ -94,11 +94,14 @@ section{padding:64px 0;border-top:1px solid var(--line)}
 
 /* Hero */
 .hero{padding:40px 0 60px}
-.hero-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:56px;align-items:center}
-.hero-copy{max-width:44ch}
-.hero h1{font-size:clamp(2.5rem,6.2vw,4.15rem);margin:18px 0 0}
+/* Copy gets the larger share and the headline is capped: at 4.15rem inside an
+   even 484/484 split the h1 broke a 55-character sentence into five lines. */
+.hero-grid{display:grid;grid-template-columns:1.15fr 1fr;gap:56px;align-items:center}
+@media(max-width:820px){.hero-grid{grid-template-columns:minmax(0,1fr);gap:44px}}
+.hero-copy{max-width:none}
+.hero h1{font-size:clamp(2.4rem,4.6vw,3.5rem);margin:18px 0 0}
 .hero h1 .accent{color:var(--accent-link)}
-.lead{font-size:clamp(1.05rem,2.2vw,1.22rem);color:var(--muted);max-width:34ch;margin:22px 0 0}
+.lead{font-size:clamp(1.05rem,2vw,1.14rem);color:var(--muted);max-width:40ch;margin:22px 0 0}
 .typed{font-family:'JetBrains Mono',monospace;font-size:1.02rem;color:var(--accent-link);
   height:1.4em;white-space:nowrap;overflow:hidden;margin:16px 0 0}
 .typed .caret{animation:blink 1s steps(1,end) infinite}
@@ -122,15 +125,21 @@ section{padding:64px 0;border-top:1px solid var(--line)}
 .wrow .v.on{color:var(--accent-link)}
 
 /* About */
-.about-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:44px;align-items:center}
-.about-photo{position:relative;aspect-ratio:1/1;max-width:340px;border-radius:16px;overflow:hidden}
-.about-photo img{width:100%;height:100%;object-fit:cover;display:block;filter:sepia(.1) saturate(1.1) contrast(1.02)}
-.about-copy{max-width:56ch}
+/* No second portrait — the hero already carries one, and two within a single
+   scroll made the top of the page read as a profile rather than a body of work.
+   Heading and body then sit side by side: a lone 62ch column left ~390px of
+   dead space to its right, and this also gives About an opening cadence the
+   other sections don't have. */
+.about-copy{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);
+  gap:64px;align-items:start}
 .about-copy h2{font-size:clamp(1.7rem,3.5vw,2.3rem);margin:12px 0 0}
-.about-copy p{color:var(--muted);font-size:1.02rem;line-height:1.75;margin:18px 0 0}
+.about-copy p{color:var(--muted);font-size:1.02rem;line-height:1.75;margin:0}
+@media(max-width:820px){.about-copy{grid-template-columns:minmax(0,1fr);gap:22px}}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:28px;
   margin-top:48px;padding-top:36px;border-top:1px solid var(--line)}
-.stat{display:flex;align-items:center;gap:16px}
+/* Top-aligned, not centred: labels wrap to one or two lines, and centring
+   made the shorter tile's number sit lower than its neighbours'. */
+.stat{display:flex;align-items:flex-start;gap:16px}
 .stat .ic{flex-shrink:0;width:52px;height:52px;border-radius:11px;display:grid;place-items:center;
   background:color-mix(in srgb,var(--accent) 12%,transparent);
   border:1px solid color-mix(in srgb,var(--accent) 28%,transparent)}
@@ -160,7 +169,9 @@ section{padding:64px 0;border-top:1px solid var(--line)}
 .post:hover{padding-left:16px}
 .post .date{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted)}
 .post .t{font-family:'Bricolage Grotesque';font-weight:600;font-size:1.12rem;letter-spacing:-.01em;color:var(--ink)}
-.post .tag{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--accent-link);white-space:nowrap}
+.post .tag{display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;
+  font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--dot);white-space:nowrap}
+.post .tag i{width:7px;height:7px;border-radius:2px;background:var(--dot);display:block;flex:none}
 @media(max-width:640px){.post{grid-template-columns:1fr;gap:6px}.post .tag{display:none}}
 
 /* Projects + experience (side by side) */
@@ -248,32 +259,167 @@ section{padding:64px 0;border-top:1px solid var(--line)}
 /* Footer */
 footer{text-align:center;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.76rem;padding:30px 0 44px}
 
-/* ============ Writing index (plaque grid) ============ */
-.whead{padding:78px 0 46px}
+/* ============ Writing index ============ */
+.whead{padding:78px 0 40px}
 .whead h1{font-size:clamp(2.4rem,6vw,3.6rem);margin:16px 0 0}
 .whead p{color:var(--muted);max-width:46ch;font-size:clamp(1rem,2vw,1.15rem);margin:20px 0 0}
-.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
-@media(max-width:860px){.pgrid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:560px){.pgrid{grid-template-columns:1fr}}
-.plaque{position:relative;aspect-ratio:16/11;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;
-  justify-content:flex-end;box-shadow:var(--shadow);border:1px solid var(--glass-brd);isolation:isolate}
-.plaque::before{content:'';position:absolute;inset:0;z-index:-2;transition:transform .55s ease;
-  background:radial-gradient(120% 120% at 18% 8%,rgba(255,255,255,.18),transparent 46%),linear-gradient(140deg,var(--g1,#C0801C),var(--g2,#6E4610))}
-.plaque:hover::before{transform:scale(1.05)}
-.ptag{position:absolute;top:15px;left:15px;z-index:2;font-family:'JetBrains Mono',monospace;font-size:.66rem;
-  letter-spacing:.06em;text-transform:uppercase;color:#fff;background:rgba(20,16,10,.30);
-  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);padding:5px 10px;border-radius:20px;border:1px solid rgba(255,255,255,.28)}
-.pcap{background:var(--glass-bg);-webkit-backdrop-filter:blur(16px) saturate(1.25);backdrop-filter:blur(16px) saturate(1.25);
-  border-top:1px solid var(--glass-brd);box-shadow:inset 0 1px 0 var(--glass-hi);padding:18px 20px;border-radius:0 0 16px 16px}
-.plaque h3{color:var(--ink);font-size:1.12rem;line-height:1.24;margin:0}
-.plaque .pmeta{color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.72rem;margin-top:8px}
+
+/* Tag hues. Each is lifted from that tag's own cover gradient rather than
+   invented, so the chip, the marker and the hover rule all agree with the art.
+   Adding a tag is one line here; anything unmapped falls back to the accent. */
+[data-tag]{--dot:var(--accent-link)}
+/* "All" is not a tag, so it stays neutral rather than borrowing the accent —
+   otherwise it renders identically to trading-bot, whose hue IS the accent. */
+.chip[data-filter="all"]{--dot:var(--ink)}
+[data-tag="trading-bot"]{--dot:#976210}
+[data-tag="ai-workflow"]{--dot:#3F6558}
+[data-tag="mcp"]{--dot:#3A4A55}
+[data-tag="infra"]{--dot:#A0512E}
+[data-theme="dark"] [data-tag="trading-bot"]{--dot:#DBA23F}
+[data-theme="dark"] [data-tag="ai-workflow"]{--dot:#7FB3A0}
+[data-theme="dark"] [data-tag="mcp"]{--dot:#8FA8B8}
+[data-theme="dark"] [data-tag="infra"]{--dot:#E08A5E}
+
+/* Tag filter rail */
+.rail{display:flex;align-items:center;justify-content:space-between;gap:24px;
+  padding:18px 0 17px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.chips{display:flex;gap:9px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:7px 14px 7px 12px;border-radius:8px;
+  border:1px solid var(--line);background:transparent;cursor:pointer;
+  font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--muted);transition:border-color .2s ease,background .2s ease,color .2s ease}
+.chip:hover{border-color:var(--dot);background:var(--surface);color:var(--ink)}
+.chip .dot{width:7px;height:7px;border-radius:2px;background:var(--dot);opacity:.45;
+  transition:opacity .2s ease,transform .2s ease}
+.chip .n{font-size:.66rem;opacity:.5;font-variant-numeric:tabular-nums}
+.chip[aria-pressed="true"]{border-color:var(--dot);color:var(--dot);
+  background:color-mix(in srgb,var(--dot) 11%,transparent)}
+.chip[aria-pressed="true"] .dot{opacity:1;transform:scale(1.15)}
+.chip[aria-pressed="true"] .n{opacity:.75}
+.rail .count{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);
+  white-space:nowrap;font-variant-numeric:tabular-nums}
+@media(max-width:640px){.rail{flex-direction:column;align-items:flex-start;gap:14px}}
+
+/* Placeholder cover, used until a post has real art. Duotone + graph-paper
+   ruling + the tag set oversized as a ghosted stamp, so an artless post reads
+   as a drawn page instead of a flat swatch. One rule for every place a cover
+   can appear — the grid, the article hero and the prev/next thumbs. */
+.grad{background:
+  repeating-linear-gradient(0deg,rgba(255,255,255,.16) 0 1px,transparent 1px 100px),
+  repeating-linear-gradient(90deg,rgba(255,255,255,.16) 0 1px,transparent 1px 100px),
+  repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,transparent 1px 20px),
+  repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 1px,transparent 1px 20px),
+  radial-gradient(120% 120% at 18% 8%,rgba(255,255,255,.20),transparent 46%),
+  linear-gradient(140deg,var(--g1,#C0801C),var(--g2,#6E4610))}
+/* Title-block stamp, bottom left, in the same mono the meta lines use. */
+.grad span{position:absolute;left:5.5%;bottom:6.5%;max-width:89%;
+  font-family:'JetBrains Mono',monospace;font-size:clamp(.62rem,1.9cqw,.9rem);
+  letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.5);
+  padding-bottom:9px;border-bottom:1px solid rgba(255,255,255,.28)}
+
+/* Post grid. No card container and no shadow: the structure is the grid and
+   the hairlines, so the cover art carries the visual weight instead of a box. */
+.pgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:34px 44px}
+@media(max-width:640px){.pgrid{grid-template-columns:1fr;gap:30px}}
+.plaque{display:flex;flex-direction:column}
+.plaque[hidden]{display:none}
+.shot{position:relative;container-type:inline-size;aspect-ratio:3/2;border-radius:10px;overflow:hidden;
+  border:1px solid var(--line);background:var(--surface)}
+.shot img,.shot .grad{position:absolute;inset:0;width:100%;height:100%;display:block;
+  object-fit:cover;transition:transform .55s cubic-bezier(.2,.7,.3,1)}
+.plaque:hover .shot img,.plaque:hover .shot .grad{transform:scale(1.035)}
+.pmeta{display:flex;align-items:center;gap:9px;margin-top:17px;
+  font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.03em;color:var(--muted)}
+.pmeta .tg{display:inline-flex;align-items:center;gap:7px;color:var(--dot);
+  text-transform:uppercase;letter-spacing:.06em}
+.pmeta .tg i{width:7px;height:7px;border-radius:2px;background:var(--dot);display:block}
+.pmeta .sep{opacity:.35}
+.plaque h3{color:var(--ink);font-size:1.3rem;line-height:1.2;letter-spacing:-.022em;
+  margin:9px 0 0;text-wrap:pretty}
+.prule{height:1px;background:var(--dot);margin-top:13px;transform:scaleX(0);transform-origin:left;
+  transition:transform .34s cubic-bezier(.2,.7,.3,1)}
+.plaque:hover .prule{transform:scaleX(1)}
 
 /* ============ Post (article) ============ */
-.article{padding:60px 0 40px}
-.article-head{max-width:720px;margin:0 auto 40px}
-.article-head .meta{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);margin-bottom:14px}
-.article-head h1{font-size:clamp(2rem,5vw,3rem)}
-.prose{max-width:720px;margin:0 auto;font-size:1.06rem;line-height:1.8}
+.article{padding:0 0 40px}
+
+/* Reading progress — a 2px rule riding the nav's own bottom edge, so the
+   article gains an orientation cue without gaining a band of chrome. */
+.prog{position:fixed;top:63px;left:0;height:2px;width:0;background:var(--accent);z-index:21}
+
+/* Series strip — full-width band, its own bottom hairline */
+.series{display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:44px 0 15px;border-bottom:1px solid var(--line)}
+.pips{display:flex;align-items:center}
+.pips i{width:9px;height:9px;border-radius:2px;background:var(--dot);opacity:.28;display:block}
+.pips i.on{opacity:1}
+.pips b{width:16px;height:1px;background:var(--dot);opacity:.28;display:block}
+.series .slab{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--dot)}
+.series .snm{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted)}
+.series .snm::before{content:'·';margin-right:12px;opacity:.5}
+
+/* Opening — copy left, cover right, optically centred against each other.
+   Sized in fr rather than px so the head holds at every viewport. */
+.ahead{display:grid;grid-template-columns:1.08fr 1fr;gap:56px;align-items:center;
+  padding:40px 0 42px;border-bottom:1px solid var(--line)}
+.ahead .ameta{display:flex;align-items:center;gap:9px;flex-wrap:wrap;
+  font-family:'JetBrains Mono',monospace;font-size:.74rem;letter-spacing:.03em;color:var(--muted)}
+.ahead .ameta .tg{display:inline-flex;align-items:center;gap:7px;color:var(--dot);
+  text-transform:uppercase;letter-spacing:.06em}
+.ahead .ameta .tg i{width:7px;height:7px;border-radius:2px;background:var(--dot);display:block}
+.ahead .ameta .sep{opacity:.35}
+.ahead h1{font-size:clamp(1.9rem,4vw,2.6rem);margin-top:15px}
+.ahead .stand{color:var(--muted);font-size:1.05rem;line-height:1.66;margin:18px 0 0;max-width:44ch}
+.cover{container-type:inline-size;aspect-ratio:3/2;border-radius:12px;overflow:hidden;border:1px solid var(--line);
+  background:var(--surface);position:relative}
+.cover img,.cover .grad{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+@media(max-width:900px){.ahead{grid-template-columns:minmax(0,1fr);gap:30px;padding:32px 0 34px}}
+
+/* Body + contents rail */
+.abody{display:grid;grid-template-columns:minmax(0,1fr) 208px;gap:56px;
+  align-items:start;margin-top:52px}
+.toc{position:sticky;top:88px}
+.toc .rhd{font-family:'JetBrains Mono',monospace;font-size:.64rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted);padding-bottom:12px}
+.toc ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.toc li{border-left:1px solid var(--line);transition:border-color .2s ease}
+.toc li.on{border-left-color:var(--dot)}
+.toc a{display:block;padding:7px 0 7px 14px;font-size:.82rem;line-height:1.4;color:var(--muted);
+  transition:color .2s ease}
+.toc li.on>a{color:var(--ink);font-weight:500}
+.toc a:hover{color:var(--ink)}
+/* Below 1000px the rail is dropped rather than turned into a drawer — the
+   progress rule still tells the reader where they are. */
+@media(max-width:1000px){.abody{grid-template-columns:minmax(0,1fr);gap:0}.toc{display:none}}
+
+/* Series footer */
+.afoot{margin-top:76px;padding-top:34px;border-top:1px solid var(--line)}
+.afoot .fhd{font-family:'JetBrains Mono',monospace;font-size:.64rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted)}
+.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:26px;margin-top:22px}
+.pair:empty{display:none}
+.np{display:grid;grid-template-columns:96px 1fr;gap:16px;align-items:center;padding:16px;
+  border:1px solid var(--line);border-radius:12px;
+  transition:border-color .2s ease,background .2s ease}
+.np:hover{border-color:var(--dot);background:var(--surface)}
+.np .th{aspect-ratio:3/2;border-radius:7px;overflow:hidden;position:relative;border:1px solid var(--line)}
+.np .th img,.np .th .grad{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.np .dir{font-family:'JetBrains Mono',monospace;font-size:.64rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--dot)}
+.np .t{font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:.98rem;line-height:1.24;
+  letter-spacing:-.015em;color:var(--ink);margin-top:6px;text-wrap:pretty}
+.np.rt{text-align:right;grid-template-columns:1fr 96px}
+.np.rt .th{order:2}
+.np.rt:only-child{grid-column:2}
+@media(max-width:640px){
+  .pair{grid-template-columns:minmax(0,1fr)}
+  .np.rt{text-align:left;grid-template-columns:96px 1fr}
+  .np.rt .th{order:0}
+  .np.rt:only-child{grid-column:1}
+}
+
+.prose{max-width:720px;font-size:1.06rem;line-height:1.8}
 .prose h2{font-size:1.6rem;margin:2em 0 .6em}
 .prose h3{font-size:1.28rem;margin:1.6em 0 .5em}
 .prose p{margin:0 0 1.2em}
@@ -285,6 +431,28 @@ footer{text-align:center;color:var(--muted);font-family:'JetBrains Mono',monospa
 .prose :not(pre)>code{background:var(--chip-bg);color:var(--chip-ink);padding:2px 6px;border-radius:6px}
 .prose blockquote{border-left:3px solid var(--accent);margin:1.4em 0;padding:.2em 0 .2em 1.2em;color:var(--muted)}
 .prose img{max-width:100%;border-radius:12px}
+/* Tables: numbers are the point. Mono + tabular figures on the numeric
+   (right-aligned) columns so digits line up; the table itself scrolls
+   horizontally instead of squeezing columns on narrow screens. */
+.prose table{display:block;width:max-content;min-width:100%;max-width:100%;
+  overflow-x:auto;border-collapse:collapse;margin:1.9em 0;font-size:.95rem;line-height:1.5}
+.prose thead th{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:500;
+  letter-spacing:.07em;text-transform:uppercase;color:var(--muted);white-space:nowrap;
+  padding:0 18px 11px;border-bottom:1px solid var(--line-strong);vertical-align:bottom}
+.prose tbody td{padding:11px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+.prose tbody tr:last-child td{border-bottom:0}
+.prose th:first-child,.prose td:first-child{padding-left:0}
+.prose th:last-child,.prose td:last-child{padding-right:0}
+.prose th[style*="right"],.prose td[style*="right"]{white-space:nowrap}
+.prose td[style*="right"]{font-family:'JetBrains Mono',monospace;font-size:.88rem;
+  font-variant-numeric:tabular-nums}
+.prose tbody tr:hover td{background:var(--chip-bg)}
+.prose td strong{color:var(--accent-link)}
+@media(max-width:600px){
+  .prose table{font-size:.88rem}
+  .prose thead th{padding:0 12px 10px}
+  .prose tbody td{padding:9px 12px}
+}
 .back{display:inline-block;margin-top:48px;font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--accent-link)}
 
 /* ============ 404 ============ */
@@ -297,6 +465,6 @@ footer{text-align:center;color:var(--muted);font-family:'JetBrains Mono',monospa
 @keyframes rise{to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){
   .reveal{animation:none;opacity:1;transform:none}
-  .post,.btn-primary,.plaque::before{transition:none}
+  .post,.btn-primary,.shot img,.shot .grad,.prule,.toc li,.toc a{transition:none}
   html{scroll-behavior:auto}
 }

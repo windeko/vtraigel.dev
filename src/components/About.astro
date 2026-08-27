@@ -1,13 +1,10 @@
 ---
-import { Image } from 'astro:assets';
-import profile from '../assets/profile.jpg';
-
 const stats = [
   {
-    label: 'happy clients, incl. freelance',
+    label: 'years shipping production software',
     value: '10+',
-    // people
-    path: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+    // clock
+    path: '<circle cx="12" cy="12" r="9"/><path d="M12 6.6V12l3.6 2.1"/>',
   },
   {
     label: 'projects, startups to big tech',
@@ -31,22 +28,19 @@ const stats = [
 ---
 <section id="about">
   <div class="wrap">
-    <div class="about-grid reveal">
-      <div class="card about-photo">
-        <Image src={profile} alt="Vladimir Traigel" width={680} widths={[340, 680]} sizes="(max-width:600px) 90vw, 340px" />
-      </div>
-      <div class="about-copy">
+    <div class="about-copy reveal">
+      <div class="about-head">
         <span class="eyebrow">About</span>
         <h2>A bit about me</h2>
-        <p>
-          I'm Vlad — I build production systems where LLMs and multi-agent workflows meet real
-          infrastructure, currently at Arbio in Berlin. Most days I'm pairing with agents almost as
-          often as with people, which still feels a little strange and a little wonderful. Outside
-          of work I'm usually still at my desk with headphones on — I think better with music
-          running than in silence. I started this site to write down what I'm actually learning,
-          not what sounds good in a bio.
-        </p>
       </div>
+      <p>
+        I'm Vlad — I build production systems where LLMs and multi-agent workflows meet real
+        infrastructure, currently at Arbio in Berlin. Most days I'm pairing with agents almost as
+        often as with people, which still feels a little strange and a little wonderful. Outside
+        of work I'm usually still at my desk with headphones on — I think better with music
+        running than in silence. I started this site to write down what I'm actually learning,
+        not what sounds good in a bio.
+      </p>
     </div>
 
     <div class="stats reveal">
