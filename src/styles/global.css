@@ -300,18 +300,33 @@ footer{text-align:center;color:var(--muted);font-family:'JetBrains Mono',monospa
   white-space:nowrap;font-variant-numeric:tabular-nums}
 @media(max-width:640px){.rail{flex-direction:column;align-items:flex-start;gap:14px}}
 
+/* Placeholder cover, used until a post has real art. Duotone + graph-paper
+   ruling + the tag set oversized as a ghosted stamp, so an artless post reads
+   as a drawn page instead of a flat swatch. One rule for every place a cover
+   can appear — the grid, the article hero and the prev/next thumbs. */
+.grad{background:
+  repeating-linear-gradient(0deg,rgba(255,255,255,.16) 0 1px,transparent 1px 100px),
+  repeating-linear-gradient(90deg,rgba(255,255,255,.16) 0 1px,transparent 1px 100px),
+  repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,transparent 1px 20px),
+  repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 1px,transparent 1px 20px),
+  radial-gradient(120% 120% at 18% 8%,rgba(255,255,255,.20),transparent 46%),
+  linear-gradient(140deg,var(--g1,#C0801C),var(--g2,#6E4610))}
+/* Title-block stamp, bottom left, in the same mono the meta lines use. */
+.grad span{position:absolute;left:5.5%;bottom:6.5%;max-width:89%;
+  font-family:'JetBrains Mono',monospace;font-size:clamp(.62rem,1.9cqw,.9rem);
+  letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.5);
+  padding-bottom:9px;border-bottom:1px solid rgba(255,255,255,.28)}
+
 /* Post grid. No card container and no shadow: the structure is the grid and
    the hairlines, so the cover art carries the visual weight instead of a box. */
 .pgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:34px 44px}
 @media(max-width:640px){.pgrid{grid-template-columns:1fr;gap:30px}}
 .plaque{display:flex;flex-direction:column}
 .plaque[hidden]{display:none}
-.shot{position:relative;aspect-ratio:3/2;border-radius:10px;overflow:hidden;
+.shot{position:relative;container-type:inline-size;aspect-ratio:3/2;border-radius:10px;overflow:hidden;
   border:1px solid var(--line);background:var(--surface)}
 .shot img,.shot .grad{position:absolute;inset:0;width:100%;height:100%;display:block;
   object-fit:cover;transition:transform .55s cubic-bezier(.2,.7,.3,1)}
-.shot .grad{background:radial-gradient(120% 120% at 18% 8%,rgba(255,255,255,.18),transparent 46%),
-  linear-gradient(140deg,var(--g1,#C0801C),var(--g2,#6E4610))}
 .plaque:hover .shot img,.plaque:hover .shot .grad{transform:scale(1.035)}
 .pmeta{display:flex;align-items:center;gap:9px;margin-top:17px;
   font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.03em;color:var(--muted)}
@@ -356,11 +371,9 @@ footer{text-align:center;color:var(--muted);font-family:'JetBrains Mono',monospa
 .ahead .ameta .sep{opacity:.35}
 .ahead h1{font-size:clamp(1.9rem,4vw,2.6rem);margin-top:15px}
 .ahead .stand{color:var(--muted);font-size:1.05rem;line-height:1.66;margin:18px 0 0;max-width:44ch}
-.cover{aspect-ratio:3/2;border-radius:12px;overflow:hidden;border:1px solid var(--line);
+.cover{container-type:inline-size;aspect-ratio:3/2;border-radius:12px;overflow:hidden;border:1px solid var(--line);
   background:var(--surface);position:relative}
 .cover img,.cover .grad{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
-.cover .grad{background:radial-gradient(120% 120% at 18% 8%,rgba(255,255,255,.18),transparent 46%),
-  linear-gradient(140deg,var(--g1,#C0801C),var(--g2,#6E4610))}
 @media(max-width:900px){.ahead{grid-template-columns:minmax(0,1fr);gap:30px;padding:32px 0 34px}}
 
 /* Body + contents rail */
