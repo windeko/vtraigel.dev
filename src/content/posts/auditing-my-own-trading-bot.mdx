@@ -17,7 +17,7 @@ draft: false
 ---
 
 
-[Last time](/writing/backtest-lying-intrabar-stop-loss), the problem was that the *backtest* was lying — it checked stop-loss once per candle while production checked every 30 seconds, and that gap was worth 28% of six years of simulated profit.
+[Last time](/writing/backtest-lying-intrabar-stop-loss/), the problem was that the *backtest* was lying — it checked stop-loss once per candle while production checked every 30 seconds, and that gap was worth 28% of six years of simulated profit.
 
 Fixing the simulator raised an uglier question. The backtest now models what production is *supposed* to do. Does production actually do it?
 
@@ -175,4 +175,4 @@ Seven of the twelve findings are closed. Four are open. One turned out not to be
 
 **Prefer loud, symmetric failures.** The clock-drift bug wasn't dangerous because it broke things; it was dangerous because it broke *exactly half* of things, and the half that kept working was the half that opens positions.
 
-One question I've skipped over three posts now: how does a solo project keep enough of this straight to be auditable in the first place? [That's the last post in the series.](/writing/writing-a-repo-for-a-reader-with-no-memory)
+One question I've skipped over three posts now: how does a solo project keep enough of this straight to be auditable in the first place? [That's the last post in the series.](/writing/writing-a-repo-for-a-reader-with-no-memory/)

@@ -42,7 +42,7 @@ const countOf = (tag: string) => posts.filter((p) => p.data.tag === tag).length;
           <div class="pgrid" style="padding:44px 0 80px">
             {posts.map((p) => (
               <PlaqueCard
-                href={`/writing/${p.id}`}
+                href={`/writing/${p.id}/`}
                 title={p.data.title}
                 tag={p.data.tag}
                 date={p.data.date}

@@ -98,7 +98,7 @@ const next = series ? atPart(series.part + 1) : undefined;
         {(prev || next) && <div class="fhd">{series!.name}</div>}
         <div class="pair">
           {prev && (
-            <a class="np" href={`/writing/${prev.id}`} data-tag={prev.data.tag}>
+            <a class="np" href={`/writing/${prev.id}/`} data-tag={prev.data.tag}>
               <div class="th">
                 {prev.data.cover.image ? (
                   <Image src={prev.data.cover.image} alt="" widths={[96, 192]} sizes="96px" />
@@ -113,7 +113,7 @@ const next = series ? atPart(series.part + 1) : undefined;
             </a>
           )}
           {next && (
-            <a class="np rt" href={`/writing/${next.id}`} data-tag={next.data.tag}>
+            <a class="np rt" href={`/writing/${next.id}/`} data-tag={next.data.tag}>
               <div>
                 <div class="dir">Part {next.data.series!.part} →</div>
                 <div class="t">{next.data.title}</div>
@@ -128,7 +128,7 @@ const next = series ? atPart(series.part + 1) : undefined;
             </a>
           )}
         </div>
-        <a class="back" href="/writing">← All writing</a>
+        <a class="back" href="/writing/">← All writing</a>
       </div>
     </div>
   </main>

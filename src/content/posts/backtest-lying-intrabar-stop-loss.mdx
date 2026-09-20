@@ -17,7 +17,7 @@ draft: false
 ---
 
 
-[Last time](/writing/tuning-a-trading-bot-1120-configs) I described the apparatus I use to pick this bot's parameters: 1,120 configs per coin, four data windows with four different jobs, pass criteria frozen in a design doc before any of it runs, and a relaxation ladder for when nothing passes. Trailing stops, post-stop cooldowns and multi-bar sell confirmation all died in that gate with zero winners across every coin.
+[Last time](/writing/tuning-a-trading-bot-1120-configs/) I described the apparatus I use to pick this bot's parameters: 1,120 configs per coin, four data windows with four different jobs, pass criteria frozen in a design doc before any of it runs, and a relaxation ladder for when nothing passes. Trailing stops, post-stop cooldowns and multi-bar sell confirmation all died in that gate with zero winners across every coin.
 
 I was proud of that gate. And every single decision it ever made ran against a backtest engine that modelled stop-losses wrong.
 
@@ -129,4 +129,4 @@ Cutting size on a coin because your simulator got more honest is a strange feeli
 
 The most valuable work on a trading bot isn't the strategy. It's making sure the numbers you're reading are about the thing you actually run.
 
-Which raised the next question, and it wasn't a comfortable one. The backtest now models what production is *supposed* to do — but does production actually do it? [I went looking.](/writing/auditing-my-own-trading-bot)
+Which raised the next question, and it wasn't a comfortable one. The backtest now models what production is *supposed* to do — but does production actually do it? [I went looking.](/writing/auditing-my-own-trading-bot/)

@@ -19,12 +19,12 @@ const fmt = (d: Date) =>
           <h2>Notes from building in the open.</h2>
           <p>Agentic dev workflows, LLM infrastructure, and the trading bot I run in production — the things I wish someone had written down first.</p>
         </div>
-        <a class="viewall" href="/writing">View all →</a>
+        <a class="viewall" href="/writing/">View all →</a>
       </div>
 
       <div class="posts">
         {posts.map((p) => (
-          <a class="post" href={`/writing/${p.id}`} data-tag={p.data.tag}>
+          <a class="post" href={`/writing/${p.id}/`} data-tag={p.data.tag}>
             <span class="date">{fmt(p.data.date)}</span>
             <span class="t">{p.data.title}</span>
             <span class="tag"><i></i>{p.data.tag}</span>
